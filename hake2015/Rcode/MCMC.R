@@ -5,7 +5,12 @@
 library(r4ss)
 library(gtools)
 
-setwd("C:/NOAA2015/Hake")
+# path on Allan's computer
+try(setwd("C:/NOAA2015/Hake"))
+# path on one of Ian's computers (others to be added later)
+if(system("hostname") %in% "ian-THINK" ){
+  setwd("C:/SS/hake/Hake_2015/")
+}
 SSdir <- file.path(getwd(),"Models")
 doPNG <- F
 
@@ -147,6 +152,13 @@ if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(5,4,0,0.5),oma=c(0,0,0.5,0.5))
 mcmc.nuisance(paste(SSdir,"2015hake_basePreSRG_mcmc12e6_Allan/",sep="/"),run="",labelstrings=c("NatM","R0", "steep", "Q_extraSD","SPB_","Bratio_","RecrDev_"),bothfiles=T)
 if(doPNG){dev.off()}
+
+stats1 <- mcmc.nuisance(paste(SSdir,"2015hake_basePreSRG_mcmc12e6_Ian/",sep="/"),run="",labelstrings=c("NatM","R0", "steep", "Q_extraSD","SPB_","Bratio_","RecrDev_"),bothfiles=T,thin=1,burn=0,  printstats=TRUE)
+stats2 <- mcmc.nuisance(paste(SSdir,"2015hake_basePreSRG_mcmc12e6_Ian/",sep="/"),run="",labelstrings=c("NatM","R0", "steep", "Q_extraSD","SPB_","Bratio_","RecrDev_"),bothfiles=T,thin=2,burn=401,printstats=TRUE)
+# which parameter failed test
+stats2$Label[stats2$heidelwelsch=="Failed"]
+# trace plot of that parameter
+plot(hakeMCMC.igt$model1$Main_RecrDev_1975,type='l')
 
 #scatterplot of key params and derived quants
 ht <- 6.5; wd<- 6.5
