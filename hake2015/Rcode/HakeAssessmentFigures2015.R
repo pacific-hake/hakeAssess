@@ -678,10 +678,20 @@ if(doPNG){dev.off()}
 ##################################################################
 ## Pearson residuals
 doPNG <- T
-ht <- 6; wd<- 6.5
+ht <- 7; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"ageCompPearsons.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
-SSplotComps(base,kind="AGE",subplot=24,fleetnames=c("Fishery","Survey"))
+SSplotComps(base,kind="AGE",subplot=24,printmkt=FALSE,printsex=FALSE,fleetnames=c("Fishery","Survey"))
+if(doPNG){dev.off()}
+
+# data only
+doPNG <- T
+ht <- 7; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"ageCompDataOnly.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+SSplotComps(base,kind="AGE",subplot=24,datonly=TRUE,
+            printmkt=FALSE,printsex=FALSE,fleetnames=c("Fishery","Survey"),
+            cexZ1=3)
 if(doPNG){dev.off()}
 
 
