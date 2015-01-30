@@ -4,11 +4,12 @@
 stop("\n  This file should not be sourced!")
 
 # paths on Ian's computers (other folks can add their own statements)
-if (system("hostname", intern=TRUE) %in% c("NWCDW01724920","ian-THINK") ){
+if (system("hostname", intern=TRUE) %in% c("NWCDW01724920","NWCLW01724829","ian-THINK") ){
   hakedir <- "C:/SS/hake/Hake_2015/"
-  rDir <- "c:/GitHub/hakeAssess/hake2015/Rcode/"
-  figDir <- file.path(hakedir,"WriteUp/Figures")
-  doMaps <- FALSE
+  rDir    <- "c:/GitHub/hakeAssess/hake2015/Rcode/"
+  figDir  <- file.path(hakedir,"WriteUp/Figures")
+  SSdir   <- file.path(hakedir, "Models")
+  doMaps  <- FALSE
 }
 
 #source("C:/NOAA2014/Hake/WriteUp/Rcode/WriteUpFunctions.R")
@@ -39,19 +40,14 @@ if(doMaps){
   data(nepacLL)
 }
 
-
-#source("Writeup/Rcode/SAFEfunctionsAndStuff.R")
-#SSdir <- "Models"
-#base <- SSgetMCMC(paste(SSdir,c("TEMP/2014hake_21_TVselex1991start_MCMC"),sep="/"),writecsv=F)$model1
-#baseMLE <- SS_output(dir=file.path(SSdir,"2014hake_21_TVselex1991start"),covar=T,verbose=F)
-
-SSdir <- file.path(hakedir, "Models")
+# important stuff to load for any plotting
 base <- SS_output(dir=file.path(SSdir,"2015hake_basePreSRG"))
 mcmc <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=FALSE)
 base$mcmc <- data.frame(mcmc$model1)
-
 endYr <- 2015
 lastCatchYr <- endYr-1
+
+
 
 spb2015 <- base$mcmc[,grep("SPB",names(base$mcmc))]/2e6
 # add more years to list each time (or generalize in the future)
@@ -360,7 +356,7 @@ axis(1,at=1966:lastCatchYr, lab=rep("",length(1966:lastCatchYr)), tcl=-0.3)
 if(doPNG){dev.off()}
 
 
-#phase plot
+#phase plot (needs values from phase plots above)
 yrs <- unlist(lapply(strsplit(names(smed),"_"),function(x){x[2]}))
 sb40 <- smed["SPB_Initial"]*0.4
 sb0 <- smed["SPB_Initial"]
@@ -372,7 +368,7 @@ spr <- pmed[yrs%in%c(1966:lastCatchYr)]
 spr.hi <- pupper[yrs%in% lastCatchYr]
 spr.lo <- plower[yrs%in% lastCatchYr]
 
-ht <- 4; wd<- 6.5
+ht <- 6.5; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"phasePlot.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0))
