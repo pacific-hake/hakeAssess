@@ -1,8 +1,8 @@
 # plot of MCMC variability in SR relationship
-source("C:/NOAA2014/Hake/WriteUp/Rcode/WriteUpFunctions.R")
 
-r21mcmc <- cbind(read.table("C:/NOAA2014/Hake/Models/2014hake_21_TVselex1991start_MCMC/posteriors.sso",header=T),
-                 read.table("C:/NOAA2014/Hake/Models/2014hake_21_TVselex1991start_MCMC/derived_posteriors.sso",header=T))
+## source("C:/NOAA2014/Hake/WriteUp/Rcode/WriteUpFunctions.R")
+## r21mcmc <- cbind(read.table("C:/NOAA2014/Hake/Models/2014hake_21_TVselex1991start_MCMC/posteriors.sso",header=T),
+##                  read.table("C:/NOAA2014/Hake/Models/2014hake_21_TVselex1991start_MCMC/derived_posteriors.sso",header=T))
 
 
 addpoly <- function(yrvec, lower, upper, shadecol=rgb(0,0,0,.1),col=1){
