@@ -368,29 +368,38 @@ spr <- pmed[yrs%in%c(1966:lastCatchYr)]
 spr.hi <- pupper[yrs%in% lastCatchYr]
 spr.lo <- plower[yrs%in% lastCatchYr]
 
+
+phase.fn <- function(){
+  par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0))
+  plot(sb,spr,type="n",pch=20,xlim=c(0,1.3),ylim=c(0,1.3),
+       #xlab="Spawning depletion (SB/SB0)",
+       xlab=expression(paste("Relative spawning biomass",~~~(italic(B[t])/italic(B)[0]))),
+       #ylab="Relative fishing intensity (1-SPR)/(1-SPR_40%)",
+       ylab=expression(paste("Relative fishing intensity",~~(1-italic(SPR))/(1-italic(SPR)['40%']))),
+       xaxs="i",yaxs="i",mgp=c(2.4,1,0))
+  colvec <- rev(rich.colors.short(n=length(sb))[-1])
+  arrows(sb[-length(sb)],spr[-length(spr)],sb[-1],spr[-1],length=0.09,
+         #col=rgb(0,0,0,0.4))
+         col=colvec)
+  points(sb,spr,type="p",pch=20)
+  points(sb[length(sb)],spr[length(spr)],pch=16,col=1,cex=1.2)
+  points(sb[1],spr[1],pch=16,col=1,cex=1.2)
+  text(sb[1],spr[1]-0.025,"1966",cex=0.6,pos=2,offset=0.15)
+  segments(sb[length(sb)],spr.lo,sb[length(sb)],spr.hi,col=rgb(0,0,0,0.5))
+  segments(sb.lo,spr[length(spr)],sb.hi,spr[length(spr)],col=rgb(0,0,0,0.5))
+  text(sb[length(sb)],spr[length(spr)]+0.045,lastCatchYr,pos=4,cex=0.6)
+  #abline(h=1,v=1,lty=2,col=rgb(0,0,0,0.4))
+  abline(h=1,v=c(0.1,0.4),lty=2,col=rgb(0,0,0,0.4))
+}
 ht <- 6.5; wd<- 6.5
-if(doPNG) {png(file.path(figDir,"phasePlot.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png(file.path(figDir,"phasePlot_tall.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
-par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0))
-plot(sb,spr,type="n",pch=20,xlim=c(0,1.3),ylim=c(0,1.3),
-     #xlab="Spawning depletion (SB/SB0)",
-     xlab=expression(paste("Relative spawning biomass",~~~(italic(B[t])/italic(B)[0]))),
-     #ylab="Relative fishing intensity (1-SPR)/(1-SPR_40%)",
-     ylab=expression(paste("Relative fishing intensity",~~(1-italic(SPR))/(1-italic(SPR)['40%']))),
-     xaxs="i",yaxs="i",mgp=c(2.4,1,0))
-colvec <- rev(rich.colors.short(n=length(sb))[-1])
-arrows(sb[-length(sb)],spr[-length(spr)],sb[-1],spr[-1],length=0.09,
-       #col=rgb(0,0,0,0.4))
-       col=colvec)
-points(sb,spr,type="p",pch=20)
-points(sb[length(sb)],spr[length(spr)],pch=16,col=1,cex=1.2)
-points(sb[1],spr[1],pch=16,col=1,cex=1.2)
-text(sb[1],spr[1]-0.025,"1966",cex=0.6,pos=2,offset=0.15)
-segments(sb[length(sb)],spr.lo,sb[length(sb)],spr.hi,col=rgb(0,0,0,0.5))
-segments(sb.lo,spr[length(spr)],sb.hi,spr[length(spr)],col=rgb(0,0,0,0.5))
-text(sb[length(sb)],spr[length(spr)]+0.045,lastCatchYr,pos=4,cex=0.6)
-#abline(h=1,v=1,lty=2,col=rgb(0,0,0,0.4))
-abline(h=1,v=c(0.1,0.4),lty=2,col=rgb(0,0,0,0.4))
+phase.fn()
+if(doPNG){dev.off()}
+ht <- 4; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"phasePlot_short.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+phase.fn()
 if(doPNG){dev.off()}
 
 
