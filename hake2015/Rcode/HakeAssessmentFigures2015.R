@@ -44,6 +44,8 @@ if(doMaps){
 base <- SS_output(dir=file.path(SSdir,"2015hake_basePreSRG"))
 mcmc <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=FALSE)
 base$mcmc <- data.frame(mcmc$model1)
+# data file for use in a few places
+dat <- SS_readdat(file.path(base$inputs$dir, "2015Hake_data.ss"))
 endYr <- 2015
 lastCatchYr <- endYr-1
 
@@ -189,9 +191,35 @@ ht<-5;wd=8
 if(doPNG) {png("WriteUp/Figures/acousticBio.png",height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(height=ht,width=wd)}
 par(las=1,mar=c(5, 4, 1, 1) + 0.1,cex.axis=0.9)
-plotBars.fn(ests2$Year,ests2,scalar=1e6,ylim=c(0,3),pch=20,xlab="Year",ylab="Biomass Index Estimate (million mt)",cex=1.5,las=1,gap=0.05,xaxt="n",ciLwd=3,ciCol=rgb(0,0,1,0.6))
+plotBars.fn(ests2$Year,ests2,scalar=1e6,ylim=c(0,3),pch=20,xlab="Year",ylab="Biomass Index Estimate (million t)",cex=1.5,las=1,gap=0.05,xaxt="n",ciLwd=3,ciCol=rgb(0,0,1,0.6))
 plotBars.fn(ests$Year,ests,scalar=1e6,ylim=c(0,3),pch=20,add=T,cex=1.5,las=1,gap=0.05,xaxt="n",ciLwd=3,ciCol=gray(0.2))
 axis(1,at=ests$Year,cex.axis=0.8)
+if(doPNG) {dev.off()}
+
+#################################
+# Acoustic survey fits
+# Acoustic survey
+# Biomass estimate
+
+doPNG <- T
+ht<-4;wd=6.5
+if(doPNG) {png(file.path(figDir,"acousticBioFit.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(height=ht,width=wd)}
+par(las=1,mar=c(5, 4, 1, 1) + 0.1,cex.axis=0.9)
+plot(0, type='n', xlim=c(1994,2014), xaxs='i', ylim=c(0,5.5e6), yaxs='i', axes=FALSE,
+     xlab="Year",ylab="Biomass index (million t)")
+cpue <- dat$CPUE[dat$CPUE$index > 0,]
+segments(x0 = cpue$year,
+         y0=qlnorm(.025,meanlog=log(cpue$ob),sdlog=cpue$se_log),
+         y1=qlnorm(.975,meanlog=log(cpue$ob),sdlog=cpue$se_log),
+         lwd=3, lend=1)
+SSplotIndices(base, subplot=2, add=TRUE, col3=rgb(1,0,0,.7))
+#plotBars.fn(ests2$Year,ests2,scalar=1e6,ylim=c(0,3),pch=20,xlab="Year",ylab="Biomass Index Estimate (million mt)",cex=1.5,las=1,gap=0.05,xaxt="n",ciLwd=3,ciCol=rgb(0,0,1,0.6))
+#plotBars.fn(ests$Year,ests,scalar=1e6,ylim=c(0,3),pch=20,add=T,cex=1.5,las=1,gap=0.05,xaxt="n",ciLwd=3,ciCol=gray(0.2))
+axis(1, at=base$cpue$Yr[base$cpue$Use==1], cex.axis=0.8, tcl=-0.6)
+axis(1, at=1990:2020, lab=rep("",length(1990:2020)), cex.axis=0.8, tcl=-0.3)
+box()
+axis(2, at=(0:5)*1e6, lab=0:5, las=1) 
 if(doPNG) {dev.off()}
 
 ###############################################################################################################
@@ -403,9 +431,9 @@ phase.fn()
 if(doPNG){dev.off()}
 
 
-#### NOTE from Ian to himself (1/29/2015 5pm): continue here
+#### NOTE from Ian to himself (1/29/2015 5pm): skipping forecast stuff for now
 ###############3
-## Forecasts
+## Forecasts    
 models <- paste(SSdir,"2014hake_21_decisionTableRuns",c("9_2014hake_21_default","7_2014hake_21_stableCatch","5_2014hake_21_375K","1_2014hake_21_0"),sep="/")
 tmp <- SSgetMCMC(dir=models,writecsv=F)
 doPNG <- T
@@ -476,6 +504,7 @@ if(doPNG){dev.off()}
 
 
 
+#### NOTE from Ian to himself (1/30/2015 9am): starting up again here
 
 
 #############################################################
@@ -484,25 +513,26 @@ if(doPNG){dev.off()}
 #
 #Data plot
 doPNG <- T
-hake2014.06 <- SS_output(dir=paste(SSdir,"2014hake_06_final2013Data",sep="/"),covar=F,verbose=F)
+#hake2014.06 <- SS_output(dir=paste(SSdir,"2014hake_06_final2013Data",sep="/"),covar=F,verbose=F)
 ht <- 4; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"data.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0))
-SS_plots(hake2014.06,uncertainty=F,minbthresh=-100,plot=24,new=F,fleetnames=c("Fishery","Survey"))
+SS_plots(base,uncertainty=F,minbthresh=-100,plot=24,new=F,png=FALSE,
+         fleetnames=c("Fishery","Survey"))
 if(doPNG){dev.off()}
 
 
-###############
+############### Ian says: Allan will need to do this one
 #Percent Seasonal Catch
 doPNG <- T
 ht <- 4; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"percSeasCatch.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
-dat <- read.csv("Data/Catches/percentSeasonalCatch.csv")
-plot(dat$Year,100*dat$Spring,type="b",pch=20,col="green2",ylim=c(0,70),las=1,xlab="Year",ylab="Percent of total catch",xaxt="n")
-lines(dat$Year,100*dat$Summer,type="b",pch=17,col="blue")
-lines(dat$Year,100*dat$Fall,type="b",pch=15,col="red")
+catchdat <- read.csv("Data/Catches/percentSeasonalCatch.csv")
+plot(catchdat$Year,100*catchdat$Spring,type="b",pch=20,col="green2",ylim=c(0,70),las=1,xlab="Year",ylab="Percent of total catch",xaxt="n")
+lines(catchdat$Year,100*catchdat$Summer,type="b",pch=17,col="blue")
+lines(catchdat$Year,100*catchdat$Fall,type="b",pch=15,col="red")
 legend("topright",c("Apr-Jun","Jul-Sep","Oct-Dec"),pch=c(20,17,15),col=c("green2","blue","red"),lty=1)
 axis(1,at=seq(1991,2013,2),cex.axis=0.9)
 if(doPNG){dev.off()}
@@ -514,84 +544,154 @@ if(doPNG){dev.off()}
 ##################################################################
 ## Combined age comps
 
-tmp <- readLines("Models/2014hake_21_TVselex1991start/2014Hake_data.ss")
-ind <- grep("Aggregate marginal fishery age comps",tmp)+2
-numObs <- 39   #as.numeric(strsplit(tmp[ind],"=")[[1]][2])
-ind <- ind:(ind+numObs-1)
-ages <- strsplit(gsub("\t"," ",tmp[ind])," +")
-ages <- t(as.data.frame(lapply(ages,function(x){as.numeric(x)})))
-dimnames(ages) <- list(NULL,c("Year","seas","fleet","gender","partition","ageError","L1","L2","nTrips",paste("a",1:15,sep="")))
-commComps <- as.data.frame(ages)
+## # code from 2014, modified for 2015
+## tmp <- readLines(file.path(base$inputs$dir, "2015Hake_data.ss"))
+## ind <- grep("Aggregate marginal fishery age comps",tmp)+2
+## numObs <- 40   #as.numeric(strsplit(tmp[ind],"=")[[1]][2])
+## ind <- ind:(ind+numObs-1)
+## ages <- strsplit(gsub("\t"," ",tmp[ind])," +")
+## ages <- t(as.data.frame(lapply(ages,function(x){as.numeric(x)})))
+## dimnames(ages) <- list(NULL,c("Year","seas","fleet","gender","partition","ageError","L1","L2","nTrips",paste("a",1:15,sep="")))
+## commComps <- as.data.frame(ages)
+##
+## ind <- grep("Number of index observations",tmp)
+## numObs <- 10
+## ind <- grep("Acoustic survey",tmp)[2]+1
+## ind <- ind:(ind+numObs-1)
+## ages <- strsplit(gsub("\t"," ",tmp[ind])," +")
+## ages <- t(as.data.frame(lapply(ages,function(x){as.numeric(x)})))
+## dimnames(ages) <- list(NULL,c("Year","seas","fleet","gender","partition","ageError","L1","L2","nTrips",paste("a",1:15,sep="")))
+## acComps <- as.data.frame(ages)
 
-ind <- grep("Number of index observations",tmp)
-numObs <- 10
-ind <- grep("Acoustic survey",tmp)[2]+1
-ind <- ind:(ind+numObs-1)
-ages <- strsplit(gsub("\t"," ",tmp[ind])," +")
-ages <- t(as.data.frame(lapply(ages,function(x){as.numeric(x)})))
-dimnames(ages) <- list(NULL,c("Year","seas","fleet","gender","partition","ageError","L1","L2","nTrips",paste("a",1:15,sep="")))
-acComps <- as.data.frame(ages)
+# alternative approach in 2015
+dat <- SS_readdat(file.path(base$inputs$dir, "2015Hake_data.ss"))
+commComps <- dat$agecomp[dat$agecomp$FltSvy==1,]
+acComps <- dat$agecomp[dat$agecomp$FltSvy==2,]
 
 maxProp <- 0.77  #make sure that this is bigger than any actual proportion
+max(commComps[,-(1:9)])
+#[1] 0.701
+max(acComps[,-(1:9)])
+#[1] 0.762
 
 doPNG <- T
 ht<-8;wd=8
-if(doPNG) {png("WriteUp/Figures/bothAgeComps.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+xlim <- c(1975,2014)
+inches <- 0.12
+fg <- gray(level=0.1, alpha=0.5)
+bg <- gray(level=0.5, alpha=0.5)
+if(doPNG) {png(file.path(figDir, "bothAgeComps.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(height=ht,width=wd)}
-par(mfrow=c(2,1),las=1,mar=c(0, 4, 0, 1) + 0.1,cex.axis=0.9,oma=c(3,0,2,0))
-x <- data.frame(expand.grid(acComps$Year,1:15),prop=unlist(acComps[,paste("a",1:15,sep="")]))
-names(x) <- c("Year","Age","prop")
-symbols(c(x[,1],-1),c(x[,2],-1),circles=sqrt(c(x[,3],maxProp)),inches=0.08,ylim=c(1,15),xlim=c(1975,2012),xlab="",ylab="Acoustic Ages",xaxt="n")
-symbols(c(1990.2,1994.2,1998.2,-1),c(16.2,16.2,16.2,-1),circles=sqrt(c(0.1,0.2,0.4,maxProp)),inches=0.08,add=T,xpd=NA)
-text(c(1990,1994,1998)+1.1,c(16.2,16.2,16.2),c("0.1","0.2","0.4"),xpd=NA,cex=0.8)
-x <- data.frame(expand.grid(commComps$Year,1:15),prop=unlist(commComps[,paste("a",1:15,sep="")]))
-names(x) <- c("Year","Age","prop")
-symbols(c(x[,1],-1),c(x[,2],-1),circles=sqrt(c(x[,3],maxProp)),inches=0.08,ylim=c(1,15),xlim=range(x$Year),xlab="Year",ylab="Commercial Ages",xaxt="n")
-axis(1,at=seq(1975,2010,5))
+par(mfrow=c(2,1),las=1,mar=c(0, 4, 0, 4) + 0.1,cex.axis=0.9,oma=c(3,0,2,0))
+x <- data.frame(expand.grid(acComps$Yr,1:15),prop=unlist(acComps[,paste("a",1:15,sep="")]))
+names(x) <- c("Yr","Age","prop")
+symbols(c(x[,1],-1),c(x[,2],-1),circles=sqrt(c(x[,3],maxProp)),inches=inches,ylim=c(1,15),xlim=xlim,xlab="",ylab="Acoustic Ages",xaxt="n",
+        fg=fg, bg=bg)
+axis(4)
+symbols(.2+c(1990,1994,1998,2002,-1),c(16.2,16.2,16.2,16.2,-1),circles=sqrt(c(0.01,0.1,0.2,0.4,maxProp)),inches=inches,add=T,xpd=NA,
+        fg=fg, bg=bg)
+text(c(1990,1994,1998,2002)+1.1,c(16.2,16.2,16.2,16.2),c("0.01","0.1","0.2","0.4"),xpd=NA,cex=0.8)
+x <- data.frame(expand.grid(commComps$Yr,1:15),prop=unlist(commComps[,paste("a",1:15,sep="")]))
+names(x) <- c("Yr","Age","prop")
+symbols(c(x[,1],-1),c(x[,2],-1),circles=sqrt(c(x[,3],maxProp)),inches=inches,ylim=c(1,15),xlim=xlim,xlab="Year",ylab="Commercial Ages",xaxt="n",
+        fg=fg, bg=bg)
+axis(4)
+axis(1,at=seq(1975,2020,5))
 if(doPNG) dev.off()
 
 
 doPNG <- T
-ht<-6.5;wd=10
-if(doPNG) {png("WriteUp/Figures/AcAgeComps_superImpose.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+ht<-4.5;wd=7
+if(doPNG) {png(file.path(figDir, "AcAgeComps_superImpose.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(height=ht,width=wd)}
 par(mfrow=c(1,1),las=1,mar=c(0, 4, 0, 1) + 0.1,cex.axis=0.9,oma=c(3,0,2,0))
-tmp <- commComps[commComps$Year %in% acComps$Year,]
-x <- data.frame(expand.grid(acComps$Year,1:15),prop=unlist(acComps[,paste("a",1:15,sep="")]))
-names(x) <- c("Year","Age","prop")
+tmp <- commComps[commComps$Yr %in% acComps$Yr,]
+x <- data.frame(expand.grid(acComps$Yr,1:15),prop=unlist(acComps[,paste("a",1:15,sep="")]))
+names(x) <- c("Yr","Age","prop")
 symbols(c(x[,1],-1),c(x[,2],-1),circles=sqrt(c(x[,3],maxProp)),inches=0.14,ylim=c(1,17),xlim=c(1995,2013),xlab="",ylab="Age",xaxt="n",fg=rgb(0,0,1,0.5),lwd=2,bg=rgb(0,0,1,0.5),yaxt="n")
 axis(1,at=c(1995,1998,2001,2003,2005,2007,2009,2011,2012,2013))
 axis(2,at=1:15,labels=c(1:14,"15+"))
-symbols(c(1990.2,1994.2,1998.2,-1)+5,c(16.4,16.4,16.4,-1),circles=sqrt(c(0.1,0.2,0.4,maxProp)),inches=0.08,add=T,xpd=NA)
+symbols(c(1990.2,1994.2,1998.2,-1)+5,c(16.4,16.4,16.4,-1),circles=sqrt(c(0.1,0.2,0.4,maxProp)),inches=inches,add=T,xpd=NA)
 text(c(1990,1994,1998)+1.1+5,c(16.4,16.4,16.4),c("0.1","0.2","0.4"),xpd=NA,cex=0.8)
 legend("topright",c("Acoustic"),pch=16,col=c("blue"),bty="n")
 abline(h=15.5)
 if(doPNG) dev.off()
 
 doPNG <- T
-ht<-6.5;wd=10
-if(doPNG) {png("WriteUp/Figures/bothAgeComps_superImpose.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+ht<-4.5;wd=7
+if(doPNG) {png(file.path(figDir, "bothAgeComps_superImpose.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(height=ht,width=wd)}
 par(mfrow=c(1,1),las=1,mar=c(0, 4, 0, 1) + 0.1,cex.axis=0.9,oma=c(3,0,2,0))
-tmp <- commComps[commComps$Year %in% acComps$Year,]
-x <- data.frame(expand.grid(acComps$Year,1:15),prop=unlist(acComps[,paste("a",1:15,sep="")]))
-names(x) <- c("Year","Age","prop")
+tmp <- commComps[commComps$Yr %in% acComps$Yr,]
+x <- data.frame(expand.grid(acComps$Yr,1:15),prop=unlist(acComps[,paste("a",1:15,sep="")]))
+names(x) <- c("Yr","Age","prop")
 symbols(c(x[,1],-1),c(x[,2],-1),circles=sqrt(c(x[,3],maxProp)),inches=0.14,ylim=c(1,17),xlim=c(1995,2013),xlab="",ylab="Age",xaxt="n",fg=rgb(0,0,1,0.5),lwd=2,bg=rgb(0,0,1,0.5),yaxt="n")
 axis(1,at=c(1995,1998,2001,2003,2005,2007,2009,2011,2012,2013))
 axis(2,at=1:15,labels=c(1:14,"15+"))
-symbols(c(1990.2,1994.2,1998.2,-1)+5,c(16.4,16.4,16.4,-1),circles=sqrt(c(0.1,0.2,0.4,maxProp)),inches=0.08,add=T,xpd=NA)
+symbols(c(1990.2,1994.2,1998.2,-1)+5,c(16.4,16.4,16.4,-1),circles=sqrt(c(0.1,0.2,0.4,maxProp)),inches=inches,add=T,xpd=NA)
 text(c(1990,1994,1998)+1.1+5,c(16.4,16.4,16.4),c("0.1","0.2","0.4"),xpd=NA,cex=0.8)
 legend("topright",c("Acoustic","Fishery"),pch=16,col=c("blue","red"),bty="n")
 abline(h=15.5)
-x <- data.frame(expand.grid(tmp$Year,1:15),prop=unlist(tmp[,paste("a",1:15,sep="")]))
-names(x) <- c("Year","Age","prop")
-symbols(c(x[,1],-1),c(x[,2],-1),circles=sqrt(c(x[,3],maxProp)),inches=0.14,ylim=c(1,15),xlim=range(x$Year),xlab="Year",ylab="Commercial Ages",xaxt="n",fg=rgb(1,0,0,0.5),lwd=2,bg=rgb(1,0,0,0.5),add=T)
+x <- data.frame(expand.grid(tmp$Yr,1:15),prop=unlist(tmp[,paste("a",1:15,sep="")]))
+names(x) <- c("Yr","Age","prop")
+symbols(c(x[,1],-1),c(x[,2],-1),circles=sqrt(c(x[,3],maxProp)),inches=0.14,ylim=c(1,15),xlim=range(x$Yr),xlab="Year",ylab="Commercial Ages",xaxt="n",fg=rgb(1,0,0,0.5),lwd=2,bg=rgb(1,0,0,0.5),add=T)
 if(doPNG) dev.off()
+
+
+doPNG <- T
+ht<-4.5;wd=7
+if(doPNG) {png(file.path(figDir, "bothAgeComps_superImpose_shift.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(height=ht,width=wd)}
+par(mfrow=c(1,1),las=1,mar=c(0, 4, 0, 1) + 0.1,cex.axis=0.9,oma=c(3,0,2,0))
+tmp <- commComps[commComps$Yr %in% acComps$Yr,]
+x <- data.frame(expand.grid(acComps$Yr,1:15),prop=unlist(acComps[,paste("a",1:15,sep="")]))
+names(x) <- c("Yr","Age","prop")
+symbols(c(x[,1],-1),c(x[,2],-1),circles=sqrt(c(x[,3],maxProp)),inches=0.14,ylim=c(1,17),xlim=c(1995,2013),xlab="",ylab="Age",xaxt="n",fg=rgb(0,0,1,0.5),lwd=2,bg=rgb(0,0,1,0.5),yaxt="n")
+axis(1,at=c(1995,1998,2001,2003,2005,2007,2009,2011,2012,2013))
+axis(2,at=1:15,labels=c(1:14,"15+"))
+symbols(c(1990.2,1994.2,1998.2,-1)+5,c(16.4,16.4,16.4,-1),circles=sqrt(c(0.1,0.2,0.4,maxProp)),inches=inches,add=T,xpd=NA)
+text(c(1990,1994,1998)+1.1+5,c(16.4,16.4,16.4),c("0.1","0.2","0.4"),xpd=NA,cex=0.8)
+legend("topright",c("Acoustic","Fishery"),pch=16,col=c("blue","red"),bty="n")
+abline(h=15.5)
+x <- data.frame(expand.grid(tmp$Yr,1:15),prop=unlist(tmp[,paste("a",1:15,sep="")]))
+names(x) <- c("Yr","Age","prop")
+symbols(c(0.2+x[,1],-1),c(x[,2],-1),circles=sqrt(c(x[,3],maxProp)),inches=0.14,ylim=c(1,15),xlim=range(x$Yr),xlab="Year",ylab="Commercial Ages",xaxt="n",fg=rgb(1,0,0,0.5),lwd=2,bg=rgb(1,0,0,0.5),add=T)
+if(doPNG) dev.off()
+
+
+##################################################################
+## Fit to age comps
+doPNG <- T
+ht <- 6; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"ageCompFitsFishery.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+SSplotComps(base,kind="AGE",subplot=1,fleets=1,fleetnames=c("Fishery","Survey"),
+            printmkt=FALSE,maxrows=7,maxcols=6,axis1=seq(1,15,2),axis2=seq(0,.7,.2))
+if(doPNG){dev.off()}
+ht <- 2.7; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"ageCompFitsSurvey.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+SSplotComps(base,kind="AGE",subplot=1,fleets=2,fleetnames=c("Fishery","Survey"),
+            printmkt=FALSE,maxrows=2,maxcols=6,axis1=seq(1,15,2),axis2=seq(0,.7,.2))
+if(doPNG){dev.off()}
+
+##################################################################
+## Pearson residuals
+doPNG <- T
+ht <- 6; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"ageCompPearsons.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+SSplotComps(base,kind="AGE",subplot=24,fleetnames=c("Fishery","Survey"))
+if(doPNG){dev.off()}
+
 
 ####################################################################################
 
 #################################################
 #Acoustic Age-1 index
+#
+# Ian: SKIPPING THIS IN 2015
+#
 doPNG <- T
 ht <- 4; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"age1Index.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
