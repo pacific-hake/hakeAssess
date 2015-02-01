@@ -15,9 +15,8 @@ if (system("hostname", intern=TRUE) %in% c("NWCDW01724920","NWCLW01724829","ian-
 #source("C:/NOAA2014/Hake/WriteUp/Rcode/WriteUpFunctions.R")
 source(file.path(rDir, "WriteUpFunctions.R"))
 
-library(r4ss)
-devtools::install_github("nwfsc-assess/nwfscSurvey")
-devtools::install_github("r4ss/r4ss")
+#devtools::install_github("nwfsc-assess/nwfscSurvey")
+#devtools::install_github("r4ss/r4ss")
 library(nwfscSurvey)
 library(date)
 library(r4ss)
@@ -990,7 +989,14 @@ ht <- 5; wd<- 5
 if(doPNG) {png(file.path(figDir,"plotPars.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(2,2),mar=c(3,3,1,1))
-SSplotPars(paste(SSdir,c("2014hake_21_TVselex1991start_MCMC"),sep="/"),strings=c("SR_BH","SR_LN","NatM","Q_extraSD"),newheaders=c("Steepness","LN(R0)","Natural mortality","Survey extra SD"),nrows=2,ncols=2,new=F)
+## SSplotPars(paste(SSdir,c("2015hake_basePreSRG_mcmc12e6"),sep="/"),
+##            strings=c("SR_BH","SR_LN","NatM","Q_extraSD"),
+##            newheaders=c("Steepness","LN(R0)","Natural mortality","Survey extra SD"),
+##            nrows=2,ncols=2,new=F)
+SSplotPars(paste(SSdir,c("2015hake_basePreSRG_plotPars"),sep="/"),
+           strings=c("SR_BH","SR_LN","NatM","Q_extraSD"),
+           newheaders=c("Steepness","LN(R0)","Natural mortality","Survey extra SD"),
+           nrows=2,ncols=2,new=F)
 if(doPNG){dev.off()}
 
 ####################################
@@ -1000,7 +1006,7 @@ models <- SSsummarize(mymodels)
 models$mcmc <- vector(mode="list",length=length(mymodels))  #create the mcmc list of model dataframes
 models$mcmc <- list(base$mcmc,base$mcmc)
 modelnames <- c("MLE","MCMC")
-ht <- 3.25; wd<- 6.5
+ht <- 3.75; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"MLEvsMCMC_depl.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
@@ -1009,14 +1015,14 @@ abline(h=c(0.1,0.4),lty=2)
 axis(2,at=c(0.1,0.4),cex.axis=0.8)
 if(doPNG){dev.off()}
 
-ht <- 3.25; wd<- 6.5
+ht <- 3.75; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"MLEvsMCMC_spb.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
 SSplotComparisons(models,legendlabels=modelnames,endyr=2014,new=F,minbthresh=0,subplots=2,legend=T,col=c("red","black"),shadecol=rgb(c(1,0),c(0,0),c(0,0),alpha=0.1),btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
 if(doPNG){dev.off()}
 
-ht <- 3.25; wd<- 6.5
+ht <- 3.75; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"MLEvsMCMC_recr.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
@@ -1040,7 +1046,8 @@ SS_plots(base,uncertainty=T,minbthresh=-100,plot=17,png=T,pwidth=6.5,pheight=8)
 
 
 #numbers at age
-SS_plots(base,uncertainty=T,minbthresh=-100,plot=12,png=T,pwidth=6.5,pheight=7)
+#SS_plots(base,uncertainty=T,minbthresh=-100,plot=12,png=T,pwidth=6.5,pheight=7)
+SSplotNumbers(base,subplot=1,plot=FALSE,print=TRUE,pwidth=6.5,pheight=6,plotdir=figDir)
 
 
 
