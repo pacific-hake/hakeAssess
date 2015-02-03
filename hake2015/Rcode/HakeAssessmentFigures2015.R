@@ -751,68 +751,79 @@ if(doPNG) dev.off()
 ## source("WriteUp/Rcode/mcmc.out.R")
 ## source("WriteUp/Rcode/mcmc.nuisance.R")
 
-# Ian: SKIPPING THIS FOR NOW, PERHAPS ALLAN WILL DO FOR 2015
+### new for 2015 exploring Arni's plotMCMC package
+require(plotMCMC)
+require(coda)
+mcmcPars <- mcmc(read.table(file.path(SSdir,"2015hake_basePreSRG_mcmc12e6",
+                                      "posteriors.sso"),header=TRUE))
+
 
 ## doPNG <- T
 require(r4ss)
+require(coda)
 hakeMCMC <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=TRUE,
             keystrings = c("NatM", "R0", "steep", "Q_extraSD"),
                       nuisancestrings = c("Objective_function", "SPB_", "InitAge", "RecrDev"))
 ht <- 4; wd<- 4.5
+
 if(doPNG) {png(file.path(figDir,"mcmcM.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(5,3.5,0,0.5),oma=c(0,2.5,0.2,0))
-mcmc.out(file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),run="",numparams=1,closeall=F,new=F)
-mtext("M (natural mortality)",side=2,outer=T,line=1.5,cex=1.1)
-
-hakeMCMC <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=T,
-            keystrings = c("R0", "steep", "Q_extraSD"),nuisancestrings = c("Objective_function", "SPB_", "InitAge", "RecrDev"))
+mcmc.out(paste(SSdir,"2015hake_basePreSRG_mcmc12e6/",sep="/"),run="",numparams=1,closeall=F,new=F,colNames=c("NatM_p_1_Fem_GP_1"))
+mtext("M (natural mortality)",side=2,outer=T,line=1.3,cex=1.1)
 if(doPNG){dev.off()}
+
 if(doPNG) {png(file.path(figDir,"mcmcR0.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(5,3.5,0,0.5),oma=c(0,2.5,0.2,0))
-mcmc.out(paste(SSdir,"2014hake_21_TVselex1991start_MCMC/",sep="/"),run="",numparams=1,closeall=F,new=F)
-mtext("ln(R0) (initial recruitment)",side=2,outer=T,line=1.5,cex=1.1)
+mcmc.out(paste(SSdir,"2015hake_basePreSRG_mcmc12e6/",sep="/"),run="",numparams=1,closeall=F,new=F,colNames=c("SR_LN.R0."))
+mtext(expression(paste(log(R[0])~"(initial recruitment)")),side=2,outer=T,line=1.0,cex=1.1)
 if(doPNG){dev.off()}
 
-hakeMCMC <- SSgetMCMC(dir=paste(SSdir,"2014hake_21_TVselex1991start_MCMC",sep="/"),writecsv=T,
-            keystrings = c("steep", "Q_extraSD"),nuisancestrings = c("Objective_function", "SPB_", "InitAge", "RecrDev"))
-if(doPNG){dev.off()}
-if(doPNG) {png(file.path(figDir,"mcmcSteep.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png(file.path(figDir,"/mcmcSteep.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(5,3.5,0,0.5),oma=c(0,2.5,0.2,0))
-mcmc.out(paste(SSdir,"2014hake_21_TVselex1991start_MCMC/",sep="/"),run="",numparams=1,closeall=F,new=F)
-mtext("h (steepness)",side=2,outer=T,line=1.5,cex=1.1)
+mcmc.out(paste(SSdir,"2015hake_basePreSRG_mcmc12e6/",sep="/"),run="",numparams=1,closeall=F,new=F,colNames=c("SR_BH_steep"))
+mtext("h (steepness)",side=2,outer=T,line=1.3,cex=1.1)
 if(doPNG){dev.off()}
 
-hakeMCMC <- SSgetMCMC(dir=paste(SSdir,"2014hake_21_TVselex1991start_MCMC",sep="/"),writecsv=T,
-            keystrings = c("Q_extraSD"),nuisancestrings = c("Objective_function", "SPB_", "InitAge", "RecrDev"))
-if(doPNG){dev.off()}
 if(doPNG) {png(file.path(figDir,"mcmcQextra.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(5,3.5,0,0.5),oma=c(0,2.5,0.2,0))
-mcmc.out(paste(SSdir,"2014hake_21_TVselex1991start_MCMC/",sep="/"),run="",numparams=1,closeall=F,new=F)
-mtext("Extra SD in survey",side=2,outer=T,line=1.5,cex=1.1)
+mcmc.out(paste(SSdir,"2015hake_basePreSRG_mcmc12e6/",sep="/"),run="",numparams=1,closeall=F,new=F,colNames=c("Q_extraSD_2_Acoustic_Survey"))
+mtext("Extra SD in survey",side=2,outer=T,line=1.3,cex=1.1)
 if(doPNG){dev.off()}
 
 
-hakeMCMC <- SSgetMCMC(dir=paste(SSdir,"2014hake_21_TVselex1991start_MCMC",sep="/"),writecsv=T,
-            keystrings = c("NatM","R0", "steep", "Q_extraSD"),nuisancestrings = c("SPB_","Bratio_","Recr_"))
+hakeMCMC <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),
+                      writecsv=TRUE,
+                      keystrings = c("NatM","R0", "steep", "Q_extraSD"),
+                      nuisancestrings = c("SPB_","Bratio_","Recr_"))
 #mcmc.out(paste(SSdir,"2013hake_19_mcmc/",sep="/"),run="",numparams=4)
 
 
 if(doPNG) {png(file.path(figDir,"mcmcDiagnostics.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(5,4,0,0.5),oma=c(0,0,0.5,0.5))
-mcmc.nuisance(paste(SSdir,"2014hake_21_TVselex1991start_MCMC/",sep="/"),run="",labelstrings=c("NatM","R0", "steep", "Q_extraSD","SPB_","Bratio_","RecrDev_"),bothfiles=T)
+mcmc.stats <- mcmc.nuisance(file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),run="",
+                            labelstrings=c("NatM","R0", "steep", "Q_extraSD",
+                                "SPB_","Bratio_","RecrDev_"),bothfiles=T)
 if(doPNG){dev.off()}
+# which parameters (if any) failed test (NULL = none in 2015)
+mcmc.stats$Label[mcmc.stats$heidelwelsch=="Failed"]
 
 #scatterplot of key params and derived quants
 ht <- 6.5; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"mcmcPairs.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
-pairs(data.frame(base$mcmc$Object,base$mcmc$NatM,base$mcmc$SR_LN,base$mcmc$SR_BH_steep,base$mcmc$Q,base$mcmc$Recr_2010,base$mcmc$Recr_2011,base$mcmc$Bratio_2014,base$mcmc$ForeCatch_2014),
-    labels=c("Obj_fun","M","ln(R0)","h","surv_SD","Recr 2010","Recr 2011","Depl 2014","2014 Catch"),pch=".",cex.labels=1.2,xaxt="n",yaxt="n",las=1,gap=0.5,oma=c(0,0,0,0))
+pairs(data.frame(base$mcmc$Object,base$mcmc$NatM,base$mcmc$SR_LN,base$mcmc$SR_BH_steep,
+                 base$mcmc$Q,base$mcmc$Recr_2008,base$mcmc$Recr_2010,
+                 base$mcmc$Bratio_2015,base$mcmc$ForeCatch_2015),
+    labels=c("Objective\nfunction","Natural\nmortality\n(M)",
+        "Equilibrium\nrecruitment\nlog(R0)",
+        "Steepness\n(h)","Extra SD\nin survey","Recruitment\n2008","Recruitment\n2010",
+        "Relative\nspawning\nbiomass\n2015","Default\nharvest\nin 2015"),
+      pch=".",cex.labels=1.2,xaxt="n",yaxt="n",las=1,gap=0.5,oma=c(0,0,0,0))
 if(doPNG){dev.off()}
 
 
@@ -1071,20 +1082,75 @@ SSplotNumbers(base,subplot=1,plot=FALSE,print=TRUE,pwidth=6.5,pheight=6,plotdir=
 
 
 
-medCatch <- median(base$mcmc$ForeCatch_2014)/1000
+medCatch <- median(base$mcmc$ForeCatch_2015)/1000
 ht <- 3; wd<- 6.5
-if(doPNG) {png(file.path(figDir,"catch2014.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png(file.path(figDir,"catch2015.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,1.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
-origy <- y <- density(base$mcmc$ForeCatch_2014/1000,from=min(base$mcmc$ForeCatch_2014/1000))
-plot(y,yaxt="n",ylab="Density",xlab="Projected 2014 catch based on the default harvest policy ('000 t)",type="l",lty=1,pch=16,xlim=c(0,2500),xaxs="i",yaxs="i",ylim=c(0,max(y$y)*1.02),lwd=3,main="",xaxt="n")
+origy <- y <- density(base$mcmc$ForeCatch_2015/1000,from=min(base$mcmc$ForeCatch_2015/1000))
+plot(y,yaxt="n",ylab="Density",xlab="Projected 2015 catch based on the default harvest policy ('000 t)",type="l",lty=1,pch=16,xlim=c(0,2500),xaxs="i",yaxs="i",ylim=c(0,max(y$y)*1.02),lwd=3,main="",xaxt="n")
 axis(1,at=seq(0,2600,200))
 mtext("Density",side=2,line=0.5,las=0)
 yy <- y
 yy$x <- c(min(y$x),y$x,max(y$x))
 yy$y <- c(-1,y$y,-1)
 polygon(yy$x,yy$y,col=gray(0.9),lwd=3)
-ind <- y$x>=quantile(base$mcmc$ForeCatch_2014/1000,0.025) & y$x<=quantile(base$mcmc$ForeCatch_2014/1000,0.975)
+ind <- y$x>=quantile(base$mcmc$ForeCatch_2015/1000,0.025) & y$x<=quantile(base$mcmc$ForeCatch_2015/1000,0.975)
+y$x <- y$x[ind]
+y$y <- y$y[ind]
+yy$x <- c(min(y$x),y$x,max(y$x))
+yy$y <- c(-1,y$y,-1)
+polygon(yy$x,yy$y,col=rgb(0,0,1,0.3),lty=0)
+lines(origy,lwd=3)
+tmpy <- y$y[min(abs(y$x-medCatch))==abs(y$x-medCatch)]
+lines(c(medCatch,medCatch),c(0,tmpy),lwd=2)
+text(medCatch,mean(c(0,tmpy)),paste("Median",round(medCatch,3),sep=" = "),srt=90,adj=c(0.5,-0.5))
+box()
+if(doPNG){dev.off()}
+
+
+
+medCatch <- median(base$mcmc$ForeCatch_2016)/1000
+ht <- 3; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"catch2016.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+par(mfrow=c(1,1),las=1,mar=c(3.6,1.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
+origy <- y <- density(base$mcmc$ForeCatch_2016/1000,from=min(base$mcmc$ForeCatch_2016/1000))
+plot(y,yaxt="n",ylab="Density",xlab="Projected 2016 catch based on the default harvest policy ('000 t)",type="l",lty=1,pch=16,xlim=c(0,2500),xaxs="i",yaxs="i",ylim=c(0,max(y$y)*1.02),lwd=3,main="",xaxt="n")
+axis(1,at=seq(0,2600,200))
+mtext("Density",side=2,line=0.5,las=0)
+yy <- y
+yy$x <- c(min(y$x),y$x,max(y$x))
+yy$y <- c(-1,y$y,-1)
+polygon(yy$x,yy$y,col=gray(0.9),lwd=3)
+ind <- y$x>=quantile(base$mcmc$ForeCatch_2016/1000,0.025) & y$x<=quantile(base$mcmc$ForeCatch_2016/1000,0.975)
+y$x <- y$x[ind]
+y$y <- y$y[ind]
+yy$x <- c(min(y$x),y$x,max(y$x))
+yy$y <- c(-1,y$y,-1)
+polygon(yy$x,yy$y,col=rgb(0,0,1,0.3),lty=0)
+lines(origy,lwd=3)
+tmpy <- y$y[min(abs(y$x-medCatch))==abs(y$x-medCatch)]
+lines(c(medCatch,medCatch),c(0,tmpy),lwd=2)
+text(medCatch,mean(c(0,tmpy)),paste("Median",round(medCatch,3),sep=" = "),srt=90,adj=c(0.5,-0.5))
+box()
+if(doPNG){dev.off()}
+
+
+medCatch <- median(base$mcmc$ForeCatch_2017)/1000
+ht <- 3; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"catch2017.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+par(mfrow=c(1,1),las=1,mar=c(3.6,1.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
+origy <- y <- density(base$mcmc$ForeCatch_2017/1000,from=min(base$mcmc$ForeCatch_2017/1000))
+plot(y,yaxt="n",ylab="Density",xlab="Projected 2017 catch based on the default harvest policy ('000 t)",type="l",lty=1,pch=16,xlim=c(0,2500),xaxs="i",yaxs="i",ylim=c(0,max(y$y)*1.02),lwd=3,main="",xaxt="n")
+axis(1,at=seq(0,2600,200))
+mtext("Density",side=2,line=0.5,las=0)
+yy <- y
+yy$x <- c(min(y$x),y$x,max(y$x))
+yy$y <- c(-1,y$y,-1)
+polygon(yy$x,yy$y,col=gray(0.9),lwd=3)
+ind <- y$x>=quantile(base$mcmc$ForeCatch_2017/1000,0.025) & y$x<=quantile(base$mcmc$ForeCatch_2017/1000,0.975)
 y$x <- y$x[ind]
 y$y <- y$y[ind]
 yy$x <- c(min(y$x),y$x,max(y$x))
@@ -1285,7 +1351,7 @@ pchs <- rep(c(18,15,17,4,20,3),4) #repeat it more than necessary
 legCol <- legPch <- rep(NA,nrow(retro))
 
 ht <- 3.75; wd<- 6.5
-if(doPNG) {png("WriteUp/Figures/retro.png"),height=ht,width=wd,pointsize=10,units="in",res=300,family="serif")}
+if(doPNG) {png("WriteUp/Figures/retro.png",height=ht,width=wd,pointsize=10,units="in",res=300,family="serif")}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(3,3,1,6)+0.1, mgp=c(2, 1, 0))
 years <- as.numeric(substring(names(retro[yearInd]),2))
@@ -1333,7 +1399,7 @@ modelnames <- c("Retro -13","Retro -12","Retro -11","Retro -10","Retro -9","Retr
 mysummary <- SSsummarize(mymodels)
 names(mcmc) <- modelnames
 mysummary$mcmc <- mcmc
-pdf(file.path(figDir,"Retros/21_retros.pdf")
+pdf(file.path(figDir,"Retros/21_retros.pdf"))
 SSplotComparisons(mysummary, legendlabels=modelnames,endyr=2014-(13:0),new=F,minbthresh = 0,
                 densitynames = c("SPB_Virgin","R0","NatM_p_1_Fem_GP_1","SR_BH_steep","Recr_2008","Recr_2009","Recr_2010","Recr_2011"),mcmc=rep(T,14))
 #plot and compare selex
@@ -1358,7 +1424,7 @@ legend("bottomright",modelnames,col=col,pch=20,lty=1)
 dev.off()
 
 ht <- 3.75; wd<- 6.5
-if(doPNG) {png("WriteUp/Figures/squidPlot_21.png"),height=ht,width=wd,pointsize=10,units="in",res=300,family="serif")}
+if(doPNG) {png(file.path(figDir,"squidPlot_21.png"),height=ht,width=wd,pointsize=10,units="in",res=300,family="serif")}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(4,4,1,1)+0.1)
 SSplotRetroDevs(mysummary,endyrvec=2014-(14:1),cohorts=1999:2013,mcmcVec=rep(T,14),labels=c("","Recruitment deviation","Age of cohort"),main="")
@@ -1449,7 +1515,7 @@ names(mcmc) <- modelnames
 mysummary25$mcmc <- mcmc
 
 mysummary <- mysummary25
-pdf(file.path(figDir,"Retros/25_retros.pdf")
+pdf(file.path(figDir,"Retros/25_retros.pdf"))
 SSplotComparisons(mysummary, legendlabels=modelnames,endyr=2014-(13:0),new=F,minbthresh = 0,
                 densitynames = c("SPB_Virgin","R0","NatM_p_1_Fem_GP_1","SR_BH_steep","Recr_2008","Recr_2009","Recr_2010","Recr_2011"),mcmc=rep(T,14))
 #plot and compare selex
@@ -1474,7 +1540,7 @@ legend("bottomright",modelnames,col=col,pch=20,lty=1)
 dev.off()
 
 ht <- 3.75; wd<- 6.5
-if(doPNG) {png("WriteUp/Figures/Retros/squidPlot_25.png"),height=ht,width=wd,pointsize=10,units="in",res=300,family="serif")}
+if(doPNG) {png("WriteUp/Figures/Retros/squidPlot_25.png",height=ht,width=wd,pointsize=10,units="in",res=300,family="serif")}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(4,4,1,1)+0.1)
 SSplotRetroDevs(mysummary25,endyrvec=2014-(14:1),cohorts=1999:2013,mcmcVec=rep(T,14),labels=c("","Recruitment deviation","Age of cohort"),main="")
@@ -1699,7 +1765,7 @@ if(doPNG) {dev.off()}
 
 doPNG <- F
 ht <- 3.25; wd<- 6.5
-if(doPNG) {png("Meetings/SRG/Figures/etro21_recr.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png("Meetings/SRG/Figures/retro21_recr.png",height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
 SSplotComparisons(mysummary,legendlabels=modelnames,endyr=2014:2009,new=F,minbthresh=0,subplots=8,legend=T,btarg=-0.4,mcmc=c(T,T,T),legendloc="topleft")
@@ -1716,7 +1782,7 @@ mysummary$mcmc <- list(avgWt$mcmc,base$mcmc)
 
 doPNG <- T
 ht <- 3.25; wd<- 6.5
-if(doPNG) {png("Meetings/SRG/Figures/avgWtCatch.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png("Meetings/SRG/Figures/avgWtCatch.png",height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
 SSplotComparisons(mysummary,legendlabels=modelnames,endyr=c(2014,2014),new=F,minbthresh=0,subplot=14,legend=T,btarg=-0.4,mcmc=c(T,T),legendloc="topright",
@@ -1753,7 +1819,7 @@ if(doPNG) {dev.off()}
 
 
 
-pdf(file.path(figDir,"Retros/21_retros.pdf")
+pdf(file.path(figDir,"Retros/21_retros.pdf"))
 SSplotComparisons(mysummary, legendlabels=modelnames,endyr=2014-(13:0),new=F,minbthresh = 0,
                 densitynames = c("SPB_Virgin","R0","NatM_p_1_Fem_GP_1","SR_BH_steep","Recr_2008","Recr_2009","Recr_2010","Recr_2011"),mcmc=rep(T,14))
 #plot and compare selex
