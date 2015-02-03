@@ -7,7 +7,7 @@ stop("\n  This file should not be sourced!")
 if (system("hostname", intern=TRUE) %in% c("NWCDW01724920","NWCLW01724829","ian-THINK") ){
   hakedir <- "C:/SS/hake/Hake_2015/"
   rDir    <- "c:/GitHub/hakeAssess/hake2015/Rcode/"
-  figDir  <- file.path(hakedir,"WriteUp/Figures999")
+  figDir  <- file.path(hakedir,"WriteUp/Figures")
   SSdir   <- file.path(hakedir, "Models")
   doMaps  <- FALSE
 }
