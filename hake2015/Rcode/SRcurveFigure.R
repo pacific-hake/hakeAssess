@@ -1,9 +1,6 @@
 # plot of MCMC variability in SR relationship
 
-## source("C:/NOAA2014/Hake/WriteUp/Rcode/WriteUpFunctions.R")
-## r21mcmc <- cbind(read.table("C:/NOAA2014/Hake/Models/2014hake_21_TVselex1991start_MCMC/posteriors.sso",header=T),
-##                  read.table("C:/NOAA2014/Hake/Models/2014hake_21_TVselex1991start_MCMC/derived_posteriors.sso",header=T))
-
+### reading of MCMC output into "base$mcmc" is in HakeAssessmentFigures2015.R
 
 addpoly <- function(yrvec, lower, upper, shadecol=rgb(0,0,0,.1),col=1){
   # add shaded uncertainty intervals behind line

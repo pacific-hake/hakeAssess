@@ -42,7 +42,7 @@ doStuff <- function(x, y=2001){
 }
 
 if(FALSE){
-  dir <- 'C:/ss/hake/Hake_2015/Models/2015hake_basePreSRG_SPRtarg'
+  dir <- 'C:/ss/hake/Hake_2015/Models/2015hake_basePreSRG_SPRtarg1990plus'
   # read starter file
   start <- SS_readstarter(file.path(dir, "starter.ss"))
   # change to read initial values from .par file
@@ -55,13 +55,20 @@ if(FALSE){
   dat <- SS_readdat(file.path(dir, "2015hake_data.SS"))
   SS_writedat(dat, file.path(dir, "2015hake_data_SPRtarg.SS"), overwrite=TRUE)
 
-  for(y in 2010:2014){
+  for(y in 1990:2014){
     print(y)
-    opt.out <- optimize(f=doStuff, lower=1000, upper=2e6, y=y, tol=0.01)
+    opt.out <- optimize(f=doStuff, lower=1000, upper=1e6, y=y, tol=0.01)
     print(opt.out)
   }
 
-  base <- SS_output('C:/ss/hake/Hake_2015/Models/2015hake_basePreSRG')
+  #base <- SS_output('C:/ss/hake/Hake_2015/Models/2015hake_basePreSRG')
   base.SPRtarg <- SS_output(dir,covar=FALSE)
   SSplotComparisons(SSsummarize(list(base, base.SPRtarg)), png=TRUE, plotdir=dir)
+  SSplotCatch(base.SPRtarg,subplot=1)
+  lines(base$timeseries$Yr, base$timeseries$"dead(B):_1", col=2, lwd=3)
+  mean(base$timeseries$"dead(B):_1"[base$timeseries$Yr %in% 1990:2014])
+  mean(base.SPRtarg$timeseries$"dead(B):_1"[base.SPRtarg$timeseries$Yr %in% 1990:2014])
+  SSplotNumbers(base.SPRtarg,plot=FALSE,print=TRUE,pwidth=6.5,pheight=6,
+                plotdir=base.SPRtarg$inputs$dir)
+
 }

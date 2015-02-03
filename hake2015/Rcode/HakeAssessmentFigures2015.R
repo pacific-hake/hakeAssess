@@ -7,7 +7,7 @@ stop("\n  This file should not be sourced!")
 if (system("hostname", intern=TRUE) %in% c("NWCDW01724920","NWCLW01724829","ian-THINK") ){
   hakedir <- "C:/SS/hake/Hake_2015/"
   rDir    <- "c:/GitHub/hakeAssess/hake2015/Rcode/"
-  figDir  <- file.path(hakedir,"WriteUp/Figures")
+  figDir  <- file.path(hakedir,"WriteUp/Figures999")
   SSdir   <- file.path(hakedir, "Models")
   doMaps  <- FALSE
 }
@@ -41,7 +41,9 @@ if(doMaps){
 
 # important stuff to load for any plotting
 base <- SS_output(dir=file.path(SSdir,"2015hake_basePreSRG"))
-mcmc <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=FALSE)
+#mcmc <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=FALSE)
+mcmc <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=FALSE,
+                  burnin=401,thin=2)
 base$mcmc <- data.frame(mcmc$model1)
 # data file for use in a few places
 dat <- SS_readdat(file.path(base$inputs$dir, "2015Hake_data.ss"))
@@ -744,21 +746,25 @@ if(doPNG) dev.off()
 
 
 #########
-# MCMC diagnostics
-source("WriteUp/Rcode/mcmc.out.R")
-source("WriteUp/Rcode/mcmc.nuisance.R")
+# MCMC diagnostics 
+## source("WriteUp/Rcode/mcmc.out.R")
+## source("WriteUp/Rcode/mcmc.nuisance.R")
 
-doPNG <- T
-hakeMCMC <- SSgetMCMC(dir=paste(SSdir,"2014hake_21_TVselex1991start_MCMC",sep="/"),writecsv=T,
-            keystrings = c("NatM", "R0", "steep", "Q_extraSD"),nuisancestrings = c("Objective_function", "SPB_", "InitAge", "RecrDev"))
+# Ian: SKIPPING THIS FOR NOW, PERHAPS ALLAN WILL DO FOR 2015
+
+## doPNG <- T
+require(r4ss)
+hakeMCMC <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=TRUE,
+            keystrings = c("NatM", "R0", "steep", "Q_extraSD"),
+                      nuisancestrings = c("Objective_function", "SPB_", "InitAge", "RecrDev"))
 ht <- 4; wd<- 4.5
 if(doPNG) {png(file.path(figDir,"mcmcM.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(5,3.5,0,0.5),oma=c(0,2.5,0.2,0))
-mcmc.out(paste(SSdir,"2014hake_21_TVselex1991start_MCMC/",sep="/"),run="",numparams=1,closeall=F,new=F)
+mcmc.out(file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),run="",numparams=1,closeall=F,new=F)
 mtext("M (natural mortality)",side=2,outer=T,line=1.5,cex=1.1)
 
-hakeMCMC <- SSgetMCMC(dir=paste(SSdir,"2014hake_21_TVselex1991start_MCMC",sep="/"),writecsv=T,
+hakeMCMC <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=T,
             keystrings = c("R0", "steep", "Q_extraSD"),nuisancestrings = c("Objective_function", "SPB_", "InitAge", "RecrDev"))
 if(doPNG){dev.off()}
 if(doPNG) {png(file.path(figDir,"mcmcR0.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
@@ -809,6 +815,15 @@ pairs(data.frame(base$mcmc$Object,base$mcmc$NatM,base$mcmc$SR_LN,base$mcmc$SR_BH
 if(doPNG){dev.off()}
 
 
+### Ian says: modifying the selectivity uncertainty plotting code below
+### while listening to GMT meeting proved totally hopeless
+
+# adding a year is complicated when your inputs have a format like this:
+head(tmpHi)
+##      X1990    X1991    X1992    X1993    X1994    X1995    X1996    X1997
+## 1 2014.000 2013.000 2012.000 2011.000 2010.000 2009.000 2008.000 2007.000
+## 2 2014.008 2013.013 2012.011 2011.011 2010.010 2009.009 2008.012 2007.011
+## 3 2014.135 2013.237 2012.185 2011.195 2010.171 2009.173 2008.200 2007.198
 
 
 #################################################
@@ -833,7 +848,7 @@ selexLow21 <- selexLow <- as.data.frame(lapply(selex,function(x){apply(x,2,quant
 
 doPNG <- T
 ht <- 9; wd<-5 
-if(doPNG) {png(file.path(figDir,"TVselexAll.png")),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png(file.path(figDir,"TVselexAll.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 ind <- 1:9
 tmp <- t(selexMed[ind,])
@@ -863,7 +878,7 @@ abline(h=c(yrs,max(yrs)+1),col=rgb(0,0,0,0.2))
 
 doPNG <- T
 ht <- 10; wd<-8
-if(doPNG) {png(file.path(figDir,"TVselexAllUncertainty.png")),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png(file.path(figDir,"TVselexAllUncertainty.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,2))
 ind <- 2:9
@@ -896,7 +911,7 @@ if(doPNG) {dev.off()}
 
 doPNG <- T
 ht <- 6; wd<-10
-if(doPNG) {png(file.path(figDir,"TVselexLinesUncertainty.png")),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png(file.path(figDir,"TVselexLinesUncertainty.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),mar=c(4,4,1,1))
 cols <- rev(rich.colors.short(6))
@@ -916,33 +931,37 @@ if(doPNG) {dev.off()}
 
 #####################################################################
 ##MLE fit to index
-mymodels <- list(base)
-mysummary <- SSsummarize(mymodels)
-modelnames <- c("Base")
-ht <- 3.5; wd<- 6.5
-if(doPNG) {png(file.path(figDir,"fitIndex.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
-if(!doPNG) {windows(width=wd,height=ht)}
-par(mfrow=c(1,1),las=1,mar=c(3.6,4,1,1),oma=c(0,0,0,0),mgp=c(2.7,1,0),cex.axis=0.7)
-SSplotComparisons(mysummary,legendlabels=modelnames,endyr=2012,new=F,minbthresh=0,subplots=11,indexUncertainty=T,legend=F,col=c("red"),shadecol=rgb(0,0,0,alpha=0.1),btarg=-0.4)
-if(doPNG){dev.off()}
+
+# fit to index covered in "Acoustic survey fits" above
+
+## mymodels <- list(base)
+## mysummary <- SSsummarize(mymodels)
+## modelnames <- c("Base")
+## ht <- 3.5; wd<- 6.5
+## if(doPNG) {png(file.path(figDir,"fitIndex.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+## if(!doPNG) {windows(width=wd,height=ht)}
+## par(mfrow=c(1,1),las=1,mar=c(3.6,4,1,1),oma=c(0,0,0,0),mgp=c(2.7,1,0),cex.axis=0.7)
+## SSplotComparisons(mysummary,legendlabels=modelnames,endyr=2012,new=F,minbthresh=0,subplots=11,indexUncertainty=T,legend=F,col=c("red"),shadecol=rgb(0,0,0,alpha=0.1),btarg=-0.4)
+## if(doPNG){dev.off()}
 
 
 # Acoustic selectivity
+doPNG <- TRUE
 selex <- base$mcmc[,grep("Selex_std_2_Fem_A_",names(base$mcmc))]
 selexMed <- apply(selex,2,median)
 selexUpp <- apply(selex,2,quantile,prob=0.975)
 selexLow <- apply(selex,2,quantile,prob=0.025)
 doPNG <- T
 ht <- 3.25; wd<-6.5
-if(doPNG) {png(file.path(figDir,"acousticSelex.png")),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png(file.path(figDir,"acousticSelex.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(4,4,1,1)+0.1)
 plot((1:9),selexMed[1:9],type="b",ylim=c(0,1),pch=20,xlab="Age",ylab="Selectivity",xaxt="n",las=1)
 for(i in 1:nrow(selex)) {
     lines((1:9),selex[i,1:9],col=rgb(0,0,0,0.1))
 }
-segments((1:9),selexUpp[1:9],(1:9),selexLow[1:9],col=rgb(0,0,1,0.8))
-points((1:9),selexMed[1:9],pch=16,cex=1.2,col=rgb(0,0,1,0.5))
+segments((1:9),selexUpp[1:9],(1:9),selexLow[1:9],col=rgb(0.1,0.1,1,0.8),lwd=3)
+points((1:9),selexMed[1:9],pch=16,cex=1.2,col=rgb(0.1,0.1,1,0.5))
 axis(1,at=1:9)
 if(doPNG) {dev.off()}
 
@@ -967,7 +986,7 @@ selexLow <- as.data.frame(lapply(selex,function(x){apply(x,2,quantile,prob=0.025
 
 doPNG <- T
 ht <- 3.25; wd<-6.5
-if(doPNG) {png(file.path(figDir,"commSelex2013.png")),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png(file.path(figDir,"commSelex2013.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(4,4,1,1)+0.1)
 plot((1:9),selexMed[2:10,1],type="n",ylim=c(0,1),pch=20,xlab="Age",ylab="Selectivity",xaxt="n",las=1)
@@ -996,7 +1015,7 @@ par(mfrow=c(2,2),mar=c(3,3,1,1))
 SSplotPars(paste(SSdir,c("2015hake_basePreSRG_plotPars"),sep="/"),
            strings=c("SR_BH","SR_LN","NatM","Q_extraSD"),
            newheaders=c("Steepness","LN(R0)","Natural mortality","Survey extra SD"),
-           nrows=2,ncols=2,new=F)
+           nrows=2,ncols=2,new=F,thin=2,burn=401)
 if(doPNG){dev.off()}
 
 ####################################
@@ -1131,7 +1150,7 @@ tmp <- selexMed+tmp
 
 doPNG <- T
 ht <- 10; wd<-8
-if(doPNG) {png(file.path(figDir,"TVselex31AllUncertainty.png")),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png(file.path(figDir,"TVselex31AllUncertainty.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,2))
 ind <- 2:12
@@ -1866,7 +1885,7 @@ allSel30 <- allSel[,-1]
 cexax <- 1
 doPNG <- T
 ht <- 8; wd<-6.5 
-if(doPNG) {png(file.path(figDir,"TVselexSens1.png")),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png(file.path(figDir,"TVselexSens1.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,3),oma=c(0,1.1,0,0))
 ind <- 1:12
