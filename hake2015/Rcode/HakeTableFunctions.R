@@ -127,7 +127,12 @@ DerivedQuantsTables.ex <- function(models,variable="SPB_",years=2003:2012,mcmc=r
         if(mcmc[i]) {
             if(is.null(models[[i]]$mcmc)) stop("mcmc table in models[[",i,"]] does not exist. Create a list element called mcmc with the derived quantites labels as headers.")
             quants <- models[[i]]$mcmc[,grep(variable,names(models[[i]]$mcmc))]/scalar[i]
-            yrs <- suppressWarnings(as.numeric(substring(names(quants),nchar(variable)+1)))  #any that are not a number (like Virgin) will give an NA and warning
+            if(variable=="Recr_") {
+                cat("Entering 'Recr_' searches for that exact phrase to eliminate ForeRecr and RecrDev\n")
+                yrs <- suppressWarnings(as.numeric(substring(names(quants),nchar(variable)+1)))  #any that are not a number (like Virgin) will give an NA and warning
+            } else {
+                yrs <- as.numeric(unlist(lapply(strsplit(names(quants),"_"),function(x){x[length(x)]})))
+            }
             vals <- apply(quants[,yrs %in% years],2,quantile,probs=c(probs[1],0.5,probs[2]))
             if(ncol(vals) != length(years)) stop("It seems that the years are not available in models[[",i,"]]$mcmc for your variable. The years available are shown above",cat(yrs,sep="\n"))
             model.out[[i]] <- t(vals)
@@ -135,7 +140,13 @@ DerivedQuantsTables.ex <- function(models,variable="SPB_",years=2003:2012,mcmc=r
         }else {
             if(is.null(models[[i]]$derived_quants)) stop("derived_quants table in models[[",i,"]] does not exist.")
             quants <- models[[i]]$derived_quants[grep(variable,models[[i]]$derived_quants$LABEL), ]
-            yrs <- suppressWarnings(as.numeric(substring(quants$LABEL,nchar(variable)+1)))  #any that are not a number (like Virgin) will give an NA and warning
+            if(variable=="Recr_") {
+                cat("Entering 'Recr_' searches for that exact phrase to eliminate ForeRecr and RecrDev")
+                yrs <- suppressWarnings(as.numeric(substring(quants$LABEL,nchar(variable)+1)))  #any that are not a number (like Virgin) will give an NA and warning
+            } else {
+                yrs <- as.numeric(unlist(lapply(strsplit(quants$LABEL,"_"),function(x){x[length(x)]})))
+            }
+#            yrs <- suppressWarnings(as.numeric(substring(quants$LABEL,nchar(variable)+1)))  #any that are not a number (like Virgin) will give an NA and warning
             MLE <- quants[yrs %in% years,"Value"]/scalar[i]
             if(length(MLE) != length(years)) stop("It seems that the years are not available in models[[",i,"]]$derived_quants for your variable. The years available are shown above",cat(yrs,sep="\n"))
             SD <- quants[yrs %in% years,"StdDev"]/scalar[i]

@@ -1,43 +1,110 @@
-### will create tables for 2013 hake assessment
+### will create tables for 2015 hake assessment
+#devtools::install_github("r4ss/r4ss")
 library(r4ss)
 
+codeDir <- "C:/Users/Allan.Hicks/Documents/GitHub/hakeAssess/hake2015/Rcode"
+setwd("C:/NOAA2015/Hake")
+source(file.path(codeDir,"HakeTableFunctions.R"))
+source(file.path(codeDir,"makeMetricsTable.r"))
 
-setwd("C:/NOAA2014/Hake")
-update_r4ss_files(local="Models/Rcode/r4ss")
-source("WriteUp/Rcode/HakeTableFunctions.R")
-source("WriteUp/Rcode/makeMetricsTable.r")
 
 SSdir <- "Models"
-base <- SS_output(dir=file.path(SSdir,"2014hake_21_TVselex1991start"),covar=F)
-mcmc <- SSgetMCMC(dir=file.path(SSdir,"2014hake_21_TVselex1991start_MCMC"),writecsv=F)
+base <- SS_output(dir=file.path(SSdir,"2015hake_basePreSRG"),covar=F)
+mcmc <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc"),writecsv=F)
 base$mcmc <- data.frame(mcmc$model1)
-
-base2 <- SS_output(dir=file.path(SSdir,"2014hake_21_TVselex1991start"),covar=F)
-mcmc2 <- SSgetMCMC(dir=file.path(SSdir,"2014hake_21_TVselex1991start_MCMC_10yrProjection"),writecsv=F)
-base2$mcmc <- data.frame(mcmc2$model1)
-
-
-
-
 
 ###Executive Summary Tables
 
-yrs <- 2003:2014
+yrs <- 2005:2015
 
 tableDir <- "WriteUp/Tables"
 
-dev.mcmc <- c(DerivedQuants.ex(models=list(base),variable="Main_RecrDev_",mcmc=c(T),scalar=1,years=2003:2009,probs=0.5),DerivedQuants.ex(models=list(base),variable="Late_RecrDev_",mcmc=c(T),scalar=1,years=2010:2013,probs=0.5),NA)
+spb.mle <- DerivedQuantsTables.ex(models=list(base),
+                       variable="SPB_", years=yrs, mcmc=F, 
+                       probs=c(0.025,0.975), scalar=1e6, csvFileName=file.path(tableDir,"spb.mle"))
+spb.mcmc <- DerivedQuantsTables.ex(models=list(base),
+                       variable="SPB_", years=yrs, mcmc=T, 
+                       probs=c(0.025,0.975), scalar=1e6, csvFileName=file.path(tableDir,"spb.mcmc"))
+bratio.mcmc <- DerivedQuantsTables.ex(models=list(base),
+                       variable="Bratio_", years=yrs, mcmc=T, 
+                       probs=c(0.025,0.975), scalar=1, csvFileName=file.path(tableDir,"bratio.mcmc"))
+recr.mcmc <- DerivedQuantsTables.ex(models=list(base),
+                       variable="Recr_", years=yrs, mcmc=T, 
+                       probs=c(0.025,0.975), scalar=1e6, csvFileName=file.path(tableDir,"recr.mcmc"))
+spr.mcmc <- DerivedQuantsTables.ex(models=list(base),
+                       variable="SPRratio_", years=yrs, mcmc=T, 
+                       probs=c(0.025,0.975), scalar=1, csvFileName=file.path(tableDir,"spr.mcmc"))
+f.mcmc <- DerivedQuantsTables.ex(models=list(base),
+                       variable="F_", years=yrs, mcmc=T, 
+                       probs=c(0.025,0.975), scalar=1, csvFileName=file.path(tableDir,"f.mcmc"))
+dev.mcmc <- DerivedQuantsTables.ex(models=list(base),
+                       variable="RecrDev_", years=yrs[-length(yrs)], mcmc=T, 
+                       probs=c(0.025,0.975), scalar=1, csvFileName=file.path(tableDir,"dev.mcmc"))
 totalb.mle <- base$timeseries$Bio_all[base$timeseries$Yr%in%(yrs)]/1e6
 expb.mle <- NA
-spb.mle <- DerivedQuants.ex(models=list(base),variable="SPB_",mcmc=c(F),scalar=1e6,years=yrs,probs=0.5)
-spb.mcmc <- DerivedQuants.ex(models=list(base),variable="SPB_",mcmc=c(T),scalar=1e6,years=yrs,probs=0.5)
-bratio.mcmc <- c(NA,DerivedQuants.ex(models=list(base),variable="Bratio_",mcmc=c(T),scalar=1,years=yrs[-1],probs=0.5))
-recr.mcmc <- DerivedQuants.ex(models=list(base),variable="Recr_",mcmc=c(T),scalar=1e6,years=yrs,probs=0.5)
-spr.mcmc <- DerivedQuants.ex(models=list(base),variable="SPRratio_",mcmc=c(T),scalar=1,years=yrs,probs=0.5)
-f.mcmc <- DerivedQuants.ex(models=list(base),variable="F_",mcmc=c(T),scalar=1,years=yrs,probs=0.5)
-x <- data.frame(totalb.mle,expb.mle,spb.mle,spb.mcmc,bratio.mcmc,recr.mcmc,dev.mcmc,spr.mcmc,f.mcmc)
-names(x) <- c("totalb.mle","expb.mle","spb.mle","spb.mcmc","bratio.mcmc","recr.mcmc","dev.mcmc","spr.mcmc","f.mcmc")
-write.csv(x,file=paste(tableDir,"ExecSummTimeSeries.csv",sep="/"))
+#x <- data.frame(totalb.mle,expb.mle,spb.mle[,2],spb.mcmc[,2],bratio.mcmc[,2],recr.mcmc[,2],dev.mcmc[,2],spr.mcmc[,2],f.mcmc[,2])
+#names(x) <- c("totalb.mle","expb.mle","spb.mle","spb.mcmc","bratio.mcmc","recr.mcmc","dev.mcmc","spr.mcmc","f.mcmc")
+#write.csv(x,file=paste(tableDir,"ExecSummTimeSeriesMid.csv",sep="/"))
+
+
+##############################################################################
+#Reference points
+
+round(quantile(base$mcmc$SSB_Unfished,prob=c(0.025,0.5,0.975))/2e6,3)
+round(quantile(base$mcmc$Recr_Virgin,prob=c(0.025,0.5,0.975))/1e6,3)
+
+round(quantile(base$mcmc$SSB_Btgt,prob=c(0.025,0.5,0.975))/2e6,3)
+round(100*quantile(base$mcmc$SPR_Btgt,prob=c(0.025,0.5,0.975)),1)
+round(100*quantile(base$mcmc$Fstd_Btgt,prob=c(0.025,0.5,0.975)),1)
+round(quantile(base$mcmc$TotYield_Btgt,prob=c(0.025,0.5,0.975))/1e6,3)
+
+round(quantile(base$mcmc$SSB_SPRtgt,prob=c(0.025,0.5,0.975))/2e6,3)
+round(100*quantile(base$mcmc$Fstd_SPRtgt,prob=c(0.025,0.5,0.975)),1)
+round(quantile(base$mcmc$TotYield_SPRtgt,prob=c(0.025,0.5,0.975))/1e6,3)
+
+round(quantile(base$mcmc$SSB_MSY,prob=c(0.025,0.5,0.975))/2e6,3)
+round(100*quantile(base$mcmc$SPR_MSY,prob=c(0.025,0.5,0.975)),1)
+round(100*quantile(base$mcmc$Fstd_MSY,prob=c(0.025,0.5,0.975)),1)
+round(quantile(base$mcmc$TotYield_MSY,prob=c(0.025,0.5,0.975))/1e6,3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 dev.mcmc <- c(DerivedQuants.ex(models=list(base),variable="Main_RecrDev_",mcmc=c(T),scalar=1,years=2003:2009,probs=0.025),DerivedQuants.ex(models=list(base),variable="Late_RecrDev_",mcmc=c(T),scalar=1,years=2010:2013,probs=0.025),NA)
 totalb.mle <- base$timeseries$Bio_all[base$timeseries$Yr%in%(yrs)]/1e6
@@ -73,26 +140,6 @@ recr.mcmc <- DerivedQuants.ex(models=list(base),variable="Late_RecrDev_",mcmc=c(
 recr.mcmc <- DerivedQuants.ex(models=list(base),variable="Late_RecrDev_",mcmc=c(T),scalar=1,years=2010:2012,probs=0.5)
 recr.mcmc <- DerivedQuants.ex(models=list(base),variable="Late_RecrDev_",mcmc=c(T),scalar=1,years=2010:2012,probs=0.975)
 
-
-##############################################################################
-#Reference points
-
-round(quantile(base$mcmc$SSB_Unfished,prob=c(0.025,0.5,0.975))/2e6,3)
-round(quantile(base$mcmc$Recr_Virgin,prob=c(0.025,0.5,0.975))/1e6,3)
-
-round(quantile(base$mcmc$SSB_Btgt,prob=c(0.025,0.5,0.975))/2e6,3)
-round(100*quantile(base$mcmc$SPR_Btgt,prob=c(0.025,0.5,0.975)),1)
-round(100*quantile(base$mcmc$Fstd_Btgt,prob=c(0.025,0.5,0.975)),1)
-round(quantile(base$mcmc$TotYield_Btgt,prob=c(0.025,0.5,0.975))/1e6,3)
-
-round(quantile(base$mcmc$SSB_SPRtgt,prob=c(0.025,0.5,0.975))/2e6,3)
-round(100*quantile(base$mcmc$Fstd_SPRtgt,prob=c(0.025,0.5,0.975)),1)
-round(quantile(base$mcmc$TotYield_SPRtgt,prob=c(0.025,0.5,0.975))/1e6,3)
-
-round(quantile(base$mcmc$SSB_MSY,prob=c(0.025,0.5,0.975))/2e6,3)
-round(100*quantile(base$mcmc$SPR_MSY,prob=c(0.025,0.5,0.975)),1)
-round(100*quantile(base$mcmc$Fstd_MSY,prob=c(0.025,0.5,0.975)),1)
-round(quantile(base$mcmc$TotYield_MSY,prob=c(0.025,0.5,0.975))/1e6,3)
 
 
 
