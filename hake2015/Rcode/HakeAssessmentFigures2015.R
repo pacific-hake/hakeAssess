@@ -41,9 +41,10 @@ if(doMaps){
 
 # important stuff to load for any plotting
 base <- SS_output(dir=file.path(SSdir,"2015hake_basePreSRG"))
-#mcmc <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=FALSE)
-mcmc <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=FALSE,
-                  burnin=401,thin=2)
+mcmc <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=FALSE)
+if(nrow(mcmc$model1)!=999){
+  stop("MCMC is not 999 rows! Make sure you did this on purpose.")
+}
 base$mcmc <- data.frame(mcmc$model1)
 # data file for use in a few places
 dat <- SS_readdat(file.path(base$inputs$dir, "2015Hake_data.ss"))
@@ -961,7 +962,7 @@ for(i in 1:nrow(selex)) {
     lines((1:9),selex[i,1:9],col=rgb(0,0,0,0.1))
 }
 segments((1:9),selexUpp[1:9],(1:9),selexLow[1:9],col=rgb(0.1,0.1,1,0.8),lwd=3)
-points((1:9),selexMed[1:9],pch=16,cex=1.2,col=rgb(0.1,0.1,1,0.5))
+points((1:9),selexMed[1:9],pch=16,cex=1.5,col=rgb(0.1,0.1,1,0.7))
 axis(1,at=1:9)
 if(doPNG) {dev.off()}
 
@@ -1015,7 +1016,7 @@ par(mfrow=c(2,2),mar=c(3,3,1,1))
 SSplotPars(paste(SSdir,c("2015hake_basePreSRG_plotPars"),sep="/"),
            strings=c("SR_BH","SR_LN","NatM","Q_extraSD"),
            newheaders=c("Steepness","LN(R0)","Natural mortality","Survey extra SD"),
-           nrows=2,ncols=2,new=F,thin=2,burn=401)
+           nrows=2,ncols=2,new=F)
 if(doPNG){dev.off()}
 
 ####################################
