@@ -3,6 +3,7 @@
 library(r4ss)
 
 codeDir <- "C:/Users/Allan.Hicks/Documents/GitHub/hakeAssess/hake2015/Rcode"
+codeDir <- "C:/Users/hicksal/Documents/GitHub/hakeAssess/hake2015/Rcode"
 setwd("C:/NOAA2015/Hake")
 source(file.path(codeDir,"HakeTableFunctions.R"))
 source(file.path(codeDir,"makeMetricsTable.r"))
@@ -20,25 +21,25 @@ yrs <- 2005:2015
 tableDir <- "WriteUp/Tables"
 
 spb.mle <- DerivedQuantsTables.ex(models=list(base),
-                       variable="SPB_", years=yrs, mcmc=F, 
+                       variable="SPB_", years=yrs, mcmc=F,
                        probs=c(0.025,0.975), scalar=1e6, csvFileName=file.path(tableDir,"spb.mle"))
 spb.mcmc <- DerivedQuantsTables.ex(models=list(base),
-                       variable="SPB_", years=yrs, mcmc=T, 
+                       variable="SPB_", years=yrs, mcmc=T,
                        probs=c(0.025,0.975), scalar=1e6, csvFileName=file.path(tableDir,"spb.mcmc"))
 bratio.mcmc <- DerivedQuantsTables.ex(models=list(base),
-                       variable="Bratio_", years=yrs, mcmc=T, 
+                       variable="Bratio_", years=yrs, mcmc=T,
                        probs=c(0.025,0.975), scalar=1, csvFileName=file.path(tableDir,"bratio.mcmc"))
 recr.mcmc <- DerivedQuantsTables.ex(models=list(base),
-                       variable="Recr_", years=yrs, mcmc=T, 
+                       variable="Recr_", years=yrs, mcmc=T,
                        probs=c(0.025,0.975), scalar=1e6, csvFileName=file.path(tableDir,"recr.mcmc"))
 spr.mcmc <- DerivedQuantsTables.ex(models=list(base),
-                       variable="SPRratio_", years=yrs, mcmc=T, 
+                       variable="SPRratio_", years=yrs, mcmc=T,
                        probs=c(0.025,0.975), scalar=1, csvFileName=file.path(tableDir,"spr.mcmc"))
 f.mcmc <- DerivedQuantsTables.ex(models=list(base),
-                       variable="F_", years=yrs, mcmc=T, 
+                       variable="F_", years=yrs, mcmc=T,
                        probs=c(0.025,0.975), scalar=1, csvFileName=file.path(tableDir,"f.mcmc"))
 dev.mcmc <- DerivedQuantsTables.ex(models=list(base),
-                       variable="RecrDev_", years=yrs[-length(yrs)], mcmc=T, 
+                       variable="RecrDev_", years=yrs[-length(yrs)], mcmc=T,
                        probs=c(0.025,0.975), scalar=1, csvFileName=file.path(tableDir,"dev.mcmc"))
 totalb.mle <- base$timeseries$Bio_all[base$timeseries$Yr%in%(yrs)]/1e6
 expb.mle <- NA
