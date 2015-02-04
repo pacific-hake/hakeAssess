@@ -21,19 +21,22 @@ HakeMetricsTable <- function(models,
   # models is a list of mcmc results
   # year - default is the current date's year + 1 so if you run this in January 2013 then year = 2014.
 
+
   metric <- function(x,year) {
     out <- rep(NA,5)
     out[1] <- max(x[,paste("ForeCatch",year-1,sep="_")])  #use max in case the first value is not the entered catch (due to low biomass and catch take entire catch)
     out[2] <- sum(x[,paste("SPB",year,sep="_")] > x[,paste("SPB",year-1,sep="_")])/nrow(x)
-    out[3] <- sum(x[,paste("Bratio",year,sep="_")] > 0.40)/nrow(x)
-    out[4] <- sum(x[,paste("Bratio",year,sep="_")] > 0.25)/nrow(x)
-    out[5] <- sum(x[,paste("Bratio",year,sep="_")] > 0.10)/nrow(x)
+    out[3] <- sum(x[,paste("Bratio",year,sep="_")] < 0.40)/nrow(x)
+    out[4] <- sum(x[,paste("Bratio",year,sep="_")] < 0.25)/nrow(x)
+    out[5] <- sum(x[,paste("Bratio",year,sep="_")] < 0.10)/nrow(x)
     out[6] <- sum(x[,paste("SPRratio",year-1,sep="_")] > 1.00)/nrow(x)
     print(out[[1]])
-    print(x[,paste("ForeCatch",year-1,sep="_")])
-    out[7] <- sum(x[,paste("ForeCatch",year,sep="_")] > out[1])/nrow(x)
+    #print(x[,paste("ForeCatch",year-1,sep="_")])
+    out[7] <- sum(x[,paste("ForeCatch",year,sep="_")] < out[1])/nrow(x)
     return(out)
   }
+
+  cat("Metrics table for",year,"\n")
   out <- t(as.data.frame(lapply(models,metric,year=year)))
   out <- out[order(out[,1]),]
 
@@ -46,12 +49,12 @@ HakeMetricsTable <- function(models,
   }
 
   colnames(out) <- c("Catch",
-                     paste("P(SB",year,">SB",year-1,")",sep=""),
-                     paste("P(SB",year,">SB40%)",sep=""),
-                     paste("P(SB",year,">SB25%)",sep=""),
-                     paste("P(SB",year,">SB10%)",sep=""),
+                     paste("P(SB",year,"<SB",year-1,")",sep=""),
+                     paste("P(SB",year,"<SB40%)",sep=""),
+                     paste("P(SB",year,"<SB25%)",sep=""),
+                     paste("P(SB",year,"<SB10%)",sep=""),
                      paste("P(relSPR",year-1,">40%)",sep=""),
-                     paste("P(C",year,">C",year-1,")",sep=""))
+                     paste("P(C",year,"<C",year-1,")",sep=""))
   rownames(out) <- getModelNamesFromDirNames(dirNames)
   return(out)
 }
