@@ -2,20 +2,18 @@
 #devtools::install_github("r4ss/r4ss")
 library(r4ss)
 
-codeDir <- "C:/Users/Allan.Hicks/Documents/GitHub/hakeAssess/hake2015/Rcode"
-codeDir <- "C:/Users/hicksal/Documents/GitHub/hakeAssess/hake2015/Rcode"
+codeDir <- "~/GitHub/hakeAssess/hake2015/Rcode"
 setwd("C:/NOAA2015/Hake")
 source(file.path(codeDir,"HakeTableFunctions.R"))
 source(file.path(codeDir,"makeMetricsTable.r"))
-
 
 SSdir <- "Models"
 base <- SS_output(dir=file.path(SSdir,"2015hake_basePreSRG"),covar=F)
 mcmc <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc"),writecsv=F)
 base$mcmc <- data.frame(mcmc$model1)
 
-###Executive Summary Tables
 
+###Executive Summary Tables
 yrs <- 2005:2015
 
 tableDir <- "WriteUp/Tables"
@@ -71,6 +69,19 @@ round(quantile(base$mcmc$TotYield_MSY,prob=c(0.025,0.5,0.975))/1e6,3)
 
 
 
+####################################################################################################
+# Metrics
+SSdir <- "C:/NOAA2015/Hake/Models/2015hake_basePreSRG_metrics"
+modelsPath   <- file.path(SSdir)
+models       <- list.dirs(modelsPath)[-1]
+mcmc         <- SSgetMCMC(models,writecsv=F)
+metricsTable <- HakeMetricsTable(mcmc,models)
+
+
+
+
+out <- HakeDecisionTablesSort.ex(mcmc,years=2014:2015,sortVar="Recr_2010",outVar="Bratio_",percentages=c(0.1,0.8,0.1),scalar=1,csvFileName=NULL)
+write.csv(out$metrics,file="Writeup/Tables/metrics2015Lower10.csv")
 
 
 
