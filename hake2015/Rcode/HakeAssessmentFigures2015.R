@@ -851,17 +851,14 @@ pairs(base$mcmc[c(grep("R0",names(base$mcmc)),
       pch=".",cex.labels=1.2,xaxt="n",yaxt="n",las=1,gap=0.5,oma=c(0,0,0,0))
 if(doPNG){dev.off()}
 
-
-### Ian says: modifying the selectivity uncertainty plotting code below
-### while listening to GMT meeting proved totally hopeless
-
-# adding a year is complicated when your inputs have a format like this:
-head(tmpHi)
-##      X1990    X1991    X1992    X1993    X1994    X1995    X1996    X1997
-## 1 2014.000 2013.000 2012.000 2011.000 2010.000 2009.000 2008.000 2007.000
-## 2 2014.008 2013.013 2012.011 2011.011 2010.010 2009.009 2008.012 2007.011
-## 3 2014.135 2013.237 2012.185 2011.195 2010.171 2009.173 2008.200 2007.198
-
+# SD of recruit devs
+labs <- base$recruitpars$Label[base$recruitpars$Yr %in% 1971:2011]
+recDevMeds <- apply(base$mcmc[names(base$mcmc) %in% labs], 2, median)
+sd(recDevMeds)
+# [1] 1.508223
+labs <- base$recruitpars$Label[base$recruitpars$Yr %in% 1946:2014]
+sd(as.matrix(base$mcmc[names(base$mcmc) %in% labs]))
+# [1] 1.509564
 
 #################################################
 # Selex
