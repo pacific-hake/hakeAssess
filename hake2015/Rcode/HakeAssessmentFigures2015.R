@@ -826,6 +826,31 @@ pairs(data.frame(base$mcmc$Object,base$mcmc$NatM,base$mcmc$SR_LN,base$mcmc$SR_BH
       pch=".",cex.labels=1.2,xaxt="n",yaxt="n",las=1,gap=0.5,oma=c(0,0,0,0))
 if(doPNG){dev.off()}
 
+ht <- 6.5; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"mcmcPairsRecruits.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+pairs(base$mcmc[c(paste0("Recr_",2005:2014))],
+    ## labels=c("Objective\nfunction","Natural\nmortality\n(M)",
+    ##     "Equilibrium\nrecruitment\nlog(R0)",
+    ##     "Steepness\n(h)","Extra SD\nin survey","Recruitment\n2008","Recruitment\n2010",
+    ##     "Relative\nspawning\nbiomass\n2015","Default\nharvest\nin 2015"),
+      pch=".",cex.labels=1.2,xaxt="n",yaxt="n",las=1,gap=0.5,oma=c(0,0,0,0))
+if(doPNG){dev.off()}
+
+ht <- 6.5; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"mcmcPairsRecDevs.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+# figure out which recruit deviation labels (either "Main_RecrDev" or "Late_RecrDev")
+# correspond to a range of years
+labs <- base$recruitpars$Label[base$recruitpars$Yr %in% 2005:2013]
+# make pairs plot
+pairs(base$mcmc[c(grep("R0",names(base$mcmc)),
+                  which(names(base$mcmc) %in% labs))],
+      labels=c("Equilibrium\nrecruitment\nlog(R0)",
+          paste("Recruit\ndev.",2005:2013)),
+      pch=".",cex.labels=1.2,xaxt="n",yaxt="n",las=1,gap=0.5,oma=c(0,0,0,0))
+if(doPNG){dev.off()}
+
 
 ### Ian says: modifying the selectivity uncertainty plotting code below
 ### while listening to GMT meeting proved totally hopeless
@@ -842,7 +867,7 @@ head(tmpHi)
 # Selex
 #################################################
 # Fishery selectivity
-yrs <- 1991:2013
+yrs <- 1991:2014
 selex <- list()
 selex[["1990"]] <- matrix(NA,nrow=nrow(base$mcmc),ncol=16)
 for(i in 1:nrow(base$mcmc)) {
@@ -854,70 +879,70 @@ for(i in yrs) {
     selex[[as.character(i)]] <- selexYear.fn(base$mcmc,i)
 }
 
-selexMed21 <- selexMed <- as.data.frame(lapply(selex,function(x){apply(x,2,median)}))
-selexUpp21 <- selexUpp <- as.data.frame(lapply(selex,function(x){apply(x,2,quantile,prob=0.975)}))
-selexLow21 <- selexLow <- as.data.frame(lapply(selex,function(x){apply(x,2,quantile,prob=0.025)}))
+selexMed2015 <- selexMed <- as.data.frame(lapply(selex,function(x){apply(x,2,median)}))
+selexUpp2015 <- selexUpp <- as.data.frame(lapply(selex,function(x){apply(x,2,quantile,prob=0.975)}))
+selexLow2015 <- selexLow <- as.data.frame(lapply(selex,function(x){apply(x,2,quantile,prob=0.025)}))
 
 doPNG <- T
-ht <- 9; wd<-5 
+ht <- 8; wd<-4.5
 if(doPNG) {png(file.path(figDir,"TVselexAll.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 ind <- 1:9
 tmp <- t(selexMed[ind,])
+par(mar=c(4,4,1,1))
 mountains(tmp,xvec=ind-1,yvec=as.numeric(substring(row.names(tmp),2)),rev=T,cex.axis=0.8)
+mtext(side=1,line=2,"Age")
+mtext(side=2,line=3,"Selectivity by year")
 if(doPNG) {dev.off()}
 
 
-yrs <- as.numeric(names(selex))
-tmp <- matrix(rep(rev(yrs),each=nrow(selexMed)),nrow=nrow(selexMed),ncol=length(yrs))
-tmpHi <- selexUpp+tmp
-tmpLo <- selexLow+tmp
-tmp <- selexMed+tmp
 
-
-
-ind <- 2:9
-plot((0:15)[ind],tmp[ind,1],type="b",ylim=range(yrs),yaxt="n",pch=20,xlab="Age",ylab="Year")
-#segments((0:15)[ind],tmpHi[ind,1],(0:15)[ind],tmpLo[ind,1])
-for(i in 2:ncol(tmp)) {
-    lines((0:15)[ind],tmp[ind,i],type="b",pch=20)
-    #segments((0:15)[ind],tmpHi[ind,i],(0:15)[ind],tmpLo[ind,i])
+### function for showing uncertainty across years in time-varying selectivity
+selPoly <- function(year,ages=1:8,yAdjust){
+## selexUpp
+## selexLow
+## selexMed
+  column <- which(names(selexMed)==paste0("X",year))
+  lines((0:15)[ages+1], yAdjust + selexMed[ages+1,column], type="b", pch=20)
+  segments(x0=(0:15)[ages+1], y0=yAdjust + selexUpp[ages+1,column],
+           x1=(0:15)[ages+1], y1=yAdjust + selexLow[ages+1,column])
+  polygon(x=c((0:15)[ages+1], rev((0:15)[ages+1])),
+          y=yAdjust + c(selexUpp[ages+1,column],rev(selexLow[ages+1,column])),
+          col=rgb(0,0,1,0.2),lty=3)
 }
-axis(2,at=yrs+0.5,label=rev(yrs),las=2,cex.axis=0.5)
-abline(h=c(yrs,max(yrs)+1),col=rgb(0,0,0,0.2))
 
-
-
+### use function above to plot uncertainty across years in time-varying selectivity
 doPNG <- T
 ht <- 10; wd<-8
 if(doPNG) {png(file.path(figDir,"TVselexAllUncertainty.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
+# range of years for each of 2 panels
+yrs1 <- 1990:2001
+yrs2 <- 2002:2014
+# maximum number (in case they are unequal in length)
+nYrsMax <- max(length(yrs1),length(yrs2))
 par(mfrow=c(1,2))
-ind <- 2:9
-n <- 23
-plot((0:15)[ind],tmp[ind,ncol(tmp)-n],type="b",ylim=c(yrs[1]+n-11,yrs[n]+2),yaxt="n",pch=20,xlab="",ylab="Year")
-segments((0:15)[ind],tmpHi[ind,ncol(tmp)-n],(0:15)[ind],tmpLo[ind,ncol(tmp)-n])
-polygon(c((0:15)[ind],rev((0:15)[ind])),c(tmpHi[ind,ncol(tmp)-n],rev(tmpLo[ind,ncol(tmp)-n])),col=rgb(0,0,1,0.2),lty=3)
-for(i in (n-1):12) {
-    lines((0:15)[ind],tmp[ind,ncol(tmp)-i],type="b",pch=20)
-    segments((0:15)[ind],tmpHi[ind,ncol(tmp)-i],(0:15)[ind],tmpLo[ind,ncol(tmp)-i])
-    polygon(c((0:15)[ind],rev((0:15)[ind])),c(tmpHi[ind,ncol(tmp)-i],rev(tmpLo[ind,ncol(tmp)-i])),col=rgb(0,0,1,0.2),lty=3)
+# left-hand set of panels
+plot(0, type="n", xlim=c(1,8), ylim=-1*(max(yrs1) - c(0, nYrsMax)),
+     yaxt="n", pch=20, xlab="", ylab="")
+lab1 <- yrs1
+axis(2, las=1, at=-yrs1+0.5, lab=lab1)
+for(y in yrs1){
+  print(y)
+  selPoly(year=y, yAdjust=-y)
 }
-axis(2,at=yrs+0.5,label=rev(yrs),las=2,cex.axis=0.7)
-abline(h=c(yrs,max(yrs)+1),col=rgb(0,0,0,0.2))
-
-n <- 11
-plot((0:15)[ind],tmp[ind,ncol(tmp)-n],type="b",ylim=c(yrs[1],yrs[n]+2),yaxt="n",pch=20,xlab="",ylab="")
-segments((0:15)[ind],tmpHi[ind,ncol(tmp)-n],(0:15)[ind],tmpLo[ind,ncol(tmp)-n])
-polygon(c((0:15)[ind],rev((0:15)[ind])),c(tmpHi[ind,ncol(tmp)-n],rev(tmpLo[ind,ncol(tmp)-n])),col=rgb(0,0,1,0.2),lty=3)
-for(i in (n-1):0) {
-    lines((0:15)[ind],tmp[ind,ncol(tmp)-i],type="b",pch=20)
-    segments((0:15)[ind],tmpHi[ind,ncol(tmp)-i],(0:15)[ind],tmpLo[ind,ncol(tmp)-i])
-    polygon(c((0:15)[ind],rev((0:15)[ind])),c(tmpHi[ind,ncol(tmp)-i],rev(tmpLo[ind,ncol(tmp)-i])),col=rgb(0,0,1,0.2),lty=3)
+abline(h=-c(min(yrs1)-1, yrs1),col=rgb(0,0,0,0.2))
+# right-hand set of panels
+plot(0, type="n", xlim=c(1,8), ylim=-1*(max(yrs2) - c(0, nYrsMax)),
+     yaxt="n", pch=20, xlab="", ylab="")
+axis(2, las=1, at=-yrs2+0.5, lab=yrs2)
+for(y in yrs2){
+  print(y)
+  selPoly(year=y, yAdjust=-y)
 }
-axis(2,at=yrs+0.5,label=rev(yrs),las=2,cex.axis=0.7)
-abline(h=c(yrs,max(yrs)+1),col=rgb(0,0,0,0.2))
+abline(h=-c(min(yrs2)-1, yrs2),col=rgb(0,0,0,0.2))
 mtext("Age",outer=T,side=1,line=-2)
+mtext("Selectivity by year",outer=T,side=2,line=-1)
 if(doPNG) {dev.off()}
 
 
@@ -928,16 +953,16 @@ if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),mar=c(4,4,1,1))
 cols <- rev(rich.colors.short(6))
 polyCols <- rev(rich.colors.short(6,alpha=0.1))
-plot(1990:2014,c(selexMed21[2,],NA),col=cols[1],ylim=c(0,1),type="l",lwd=3,xlab="Year",ylab="",xaxt="n",las=1)
+plot(1990:2015,c(selexMed2015[2,],NA),col=cols[1],ylim=c(0,1),type="l",lwd=3,xlab="Year",ylab="",xaxt="n",las=1)
 for(i in 1:6) {
-    polygon(c(1990:2013,rev(1990:2013)),c(selexLow21[i+1,],rev(selexUpp21[i+1,])),col=polyCols[i],lty=3,border=cols[i])
+    polygon(c(1990:2014,rev(1990:2014)),c(selexLow2015[i+1,],rev(selexUpp2015[i+1,])),col=polyCols[i],lty=3,border=cols[i])
 }
 for(i in 1:6) {
-    lines(1990:2013,c(selexMed21[i+1,]),col=cols[i],lwd=3)
+    lines(1990:2014,c(selexMed2015[i+1,]),col=cols[i],lwd=3)
 }
-axis(1,at=seq(1990,2013,3))
+axis(1,at=seq(1990,2014,3))
 mtext("Proportion Selected",side=2,line=3)
-text(rep(2013,6),selexMed21[2:7,ncol(selexMed21)],paste("Age",1:6),pos=4)
+text(rep(2014,6),selexMed2015[2:7,ncol(selexMed2015)],paste("Age",1:6),pos=4)
 if(doPNG) {dev.off()}
 
 
@@ -979,10 +1004,28 @@ if(doPNG) {dev.off()}
 
 tmp <- t(apply(selex,1,function(x){diff(as.numeric(x))}))
 xx <- apply(tmp<0,1,any)
+cat("MCMC samples with some dome in acoustic selectivity (out of ",nrow(tmp),"): ",sum(xx),"\n", sep="") 
+## MCMC samples with some dome in acoustic selectivity (out of 999): 939
 xxx <- apply(tmp<0,2,sum)
+data.frame(label=paste0("decline from age",1:14,"-",2:15), count=xxx)
+##                    label count
+## 1    decline from age1-2     0
+## 2    decline from age2-3    22
+## 3    decline from age3-4   519
+## 4    decline from age4-5   692
+## 5    decline from age5-6    12
+## 6    decline from age6-7     0
+## 7    decline from age7-8     0
+## 8    decline from age8-9     0
+## 9   decline from age9-10     0
+## 10 decline from age10-11     0
+## 11 decline from age11-12     0
+## 12 decline from age12-13     0
+## 13 decline from age13-14     0
+## 14 decline from age14-15     0
 
-# 2013 Commercial selectivity
-yrs <- 2013
+# 2014 Commercial selectivity
+yrs <- 2014
 selex <- list()
 selex[["1990"]] <- matrix(NA,nrow=nrow(base$mcmc),ncol=16)
 for(i in 1:nrow(base$mcmc)) {
@@ -998,19 +1041,33 @@ selexLow <- as.data.frame(lapply(selex,function(x){apply(x,2,quantile,prob=0.025
 
 doPNG <- T
 ht <- 3.25; wd<-6.5
-if(doPNG) {png(file.path(figDir,"commSelex2013.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(doPNG) {png(file.path(figDir,"commSelex1990.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(4,4,1,1)+0.1)
 plot((1:9),selexMed[2:10,1],type="n",ylim=c(0,1),pch=20,xlab="Age",ylab="Selectivity",xaxt="n",las=1)
-for(i in 1:nrow(selex[["2013"]])) {
-    lines((1:9),selex[["2013"]][i,2:10],col=rgb(0,0,0,0.1))
+for(i in 1:nrow(selex[["1990"]])) {
+    lines((1:9),selex[["1990"]][i,2:10],col=rgb(0,0,0,0.1))
 }
-points((1:9),selexMed[2:10,"X1990"],pch=16,cex=1.2,col=rgb(0,0,0,0.5))
-segments((1:9),selexUpp[2:10,"X2013"],(1:9),selexLow[2:10,"X2013"],col=rgb(1,0,0,0.8))
-points((1:9),selexMed[2:10,"X2013"],pch=16,cex=1.2,col=rgb(1,0,0,0.5))
-points((1:9),selexMed[2:10,"X1990"],pch=16,cex=1.2,col=rgb(1,1,1,0.5))
+segments((1:9),selexUpp[2:10,"X1990"],(1:9),selexLow[2:10,"X1990"],col=rgb(1,0.1,0.1,0.8),lwd=3)
+points((1:9),selexMed[2:10,"X1990"],pch=16,cex=1.2,col=rgb(1,0.1,0.1,0.7), type="b")
 axis(1,at=1:9)
 if(doPNG) {dev.off()}
+
+doPNG <- T
+ht <- 3.25; wd<-6.5
+if(doPNG) {png(file.path(figDir,"commSelex2014.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+par(mar=c(4,4,1,1)+0.1)
+plot((1:9),selexMed[2:10,1],type="n",ylim=c(0,1),pch=20,xlab="Age",ylab="Selectivity",xaxt="n",las=1)
+for(i in 1:nrow(selex[["2014"]])) {
+    lines((1:9),selex[["2014"]][i,2:10],col=rgb(0,0,0,0.1))
+}
+segments((1:9),selexUpp[2:10,"X2014"],(1:9),selexLow[2:10,"X2014"],col=rgb(1,0.1,0.1,0.8),lwd=3)
+points((1:9),selexMed[2:10,"X2014"],pch=16,cex=1.2,col=rgb(1,0.1,0.1,0.7))
+axis(1,at=1:9)
+if(doPNG) {dev.off()}
+
+
 
 
 
