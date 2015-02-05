@@ -29,4 +29,10 @@ A fixed catch level is easy because you simply enter that catch level. There are
 - SPR=100% : This si the catch that results in a median SPR of 100%. The default harvest rate catch may not have an SPR of 100% because of time-varying selectivity, growth (i.e., weight-at-age), etc.  This gives an indication of the current pattern of fishing and how it relates to the benchmark population.  Iteratively search for the catch that results in a median SPRratio of 1.  Don't forget to run mceval after modifying the forecast file.
 - Default harvest rule: The catch determined by the default harvest rule. Simply copy the median ForeCatch caluclated by SS into the forecast file, so that every mceval uses that fixed catch. Don't forget to run mceval after modifying the forecast file.
 
-NOTE: for second year metrics and decision tables, fix the first year to determine the second year (i.e., fix 2015 catch at median default harvest rate catch, to determine the median default harvest catch for 2016).
+NOTE: for second year metrics, fix the first year to determine the second year (i.e., fix 2015 catch at median default harvest rate catch, to determine the median default harvest catch for 2016).
+
+Decision Tables
+---------------
+For decision tables, you will need to enter in catches for every year (different than metrics).  I have some Rcode that will create the directories and forecast files with the catch levels.  Then, run the mceval for each folder.  NOTE: you can have a zero catch, except for the final forecast year, so I usually enter 0.01 for zero catch.
+
+With the decision tables displaying Bratio and SPR, the final year of forecasted catch is only pertinent for SPR, since Bratio is beginning of the year.
