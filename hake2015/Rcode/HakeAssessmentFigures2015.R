@@ -1095,7 +1095,7 @@ ht <- 3.75; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"MLEvsMCMC_depl.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
-SSplotComparisons(models,legendlabels=modelnames,endyr=2014,new=F,minbthresh=0,subplots=4,legend=T,col=c("red","black"),shadecol=rgb(c(1,0),c(0,0),c(0,0),alpha=0.1),btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
+SSplotComparisons(models,legendlabels=modelnames,endyr=endYr,new=F,minbthresh=0,subplots=4,legend=T,col=c("red","black"),shadecol=rgb(c(1,0),c(0,0),c(0,0),alpha=0.1),btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
 abline(h=c(0.1,0.4),lty=2)
 axis(2,at=c(0.1,0.4),cex.axis=0.8)
 if(doPNG){dev.off()}
@@ -1104,14 +1104,14 @@ ht <- 3.75; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"MLEvsMCMC_spb.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
-SSplotComparisons(models,legendlabels=modelnames,endyr=2014,new=F,minbthresh=0,subplots=2,legend=T,col=c("red","black"),shadecol=rgb(c(1,0),c(0,0),c(0,0),alpha=0.1),btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
+SSplotComparisons(models,legendlabels=modelnames,endyr=endYr,new=F,minbthresh=0,subplots=2,legend=T,col=c("red","black"),shadecol=rgb(c(1,0),c(0,0),c(0,0),alpha=0.1),btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
 if(doPNG){dev.off()}
 
 ht <- 3.75; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"MLEvsMCMC_recr.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
-SSplotComparisons(models,legendlabels=modelnames,endyr=2014,new=F,minbthresh=0,subplots=8,legend=T,col=c("red","black"),shadecol=rgb(c(1,0),c(0,0),c(0,0),alpha=0.1),btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
+SSplotComparisons(models,legendlabels=modelnames,endyr=endYr,new=F,minbthresh=0,subplots=8,legend=T,col=c("red","black"),shadecol=rgb(c(1,0),c(0,0),c(0,0),alpha=0.1),btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
 if(doPNG){dev.off()}
 
 
