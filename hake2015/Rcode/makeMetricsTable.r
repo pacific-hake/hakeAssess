@@ -76,14 +76,14 @@ HakeMetricsTableRisk <- function(models,
     out[5] <- sum(x[,paste("Bratio",year,sep="_")] < 0.10)/nrow(x)
     out[6] <- sum(x[,paste("SPRratio",year-1,sep="_")] > 1.00)/nrow(x)
     print(out[[1]])
-    print(x[,paste("ForeCatch",year-1,sep="_")])
+    #print(x[,paste("ForeCatch",year-1,sep="_")])
     out[7] <- sum(x[,paste("ForeCatch",year,sep="_")] < out[1])/nrow(x)
     return(out)
   }
-  print(head(models[[1]]))
+  #print(head(models[[1]]))
   out <- t(as.data.frame(lapply(models,metric,year=year)))
-  return(out)
-  out <- out[order(out[,1]),]
+  #return(out)
+  #out <- out[order(out[,1]),]
 
   if(makePercentages){
     out[,2:7] <- out[,2:7]*100.0  # make percentages

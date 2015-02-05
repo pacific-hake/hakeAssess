@@ -174,7 +174,7 @@ DerivedQuantsTables.ex <- function(models,variable="SPB_",years=2003:2012,mcmc=r
 }
 
 
-HakeDecisionTablesQuantiles.ex <- function(models,years=2013:2014,outVar="Bratio_",quantiles=c(0.05,0.25,0.5,0.75,0.95),scalar=1,csvFileName=NULL) {
+HakeDecisionTablesQuantiles.ex <- function(models,years,outVar="Bratio_",quantiles=c(0.05,0.25,0.5,0.75,0.95),scalar=1,csvFileName=NULL,sort=F) {
     #creates decision tables from multiple model runs
     #uses the posterior of the 2008 year class
     
@@ -197,9 +197,10 @@ HakeDecisionTablesQuantiles.ex <- function(models,years=2013:2014,outVar="Bratio
         outVals <- rbind(outVals,vals)
         outNotCatch <- rbind(outNotCatch,catch)
     }
-    outVals <- outVals[order(outVals[,"medCatch"],outVals[,"years"]),]  #sort by median catch then year
-    outNotCatch <- outNotCatch[order(outNotCatch[,"medCatch"],outNotCatch[,"years"]),]  #sort by median catch then year
-    #dimnames(outVals) <- list(rep(years,nmodels),c("Year","Catch",as.character(quantiles)))
+    if(sort) {
+        outVals <- outVals[order(outVals[,"medCatch"],outVals[,"years"]),]  #sort by median catch then year
+        outNotCatch <- outNotCatch[order(outNotCatch[,"medCatch"],outNotCatch[,"years"]),]  #sort by median catch then year
+    }
 
     if(is.null(csvFileName)) {
         return(list(outVals,outNotCatch))
