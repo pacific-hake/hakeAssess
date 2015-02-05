@@ -76,7 +76,27 @@ modelsPath   <- file.path(SSdir)
 models       <- list.dirs(modelsPath)[-1]
 mcmc         <- SSgetMCMC(models,writecsv=F)
 metricsTable <- HakeMetricsTable(mcmc,models)
+write.csv(metricsTable,"Writeup/Tables/metrics2015.csv")
 
+#SPR of 100%
+median(mcmc$model6$SPRratio_2015)
+#median B2015 = median B2016
+median(mcmc$model2$SPB_2015)
+median(mcmc$model2$SPB_2016)
+
+#Second year metrics
+SSdir <- "C:/NOAA2015/Hake/Models/2015hake_basePreSRG_metrics2"
+modelsPath   <- file.path(SSdir)
+models       <- list.dirs(modelsPath)[-1]
+mcmc         <- SSgetMCMC(models,writecsv=F,)
+metricsTable <- HakeMetricsTable(mcmc,models,year=2017)
+write.csv(metricsTable,"Writeup/Tables/metrics2016.csv")
+
+#SPR of 100%
+median(mcmc$model6$SPRratio_2016)
+#median B2015 = median B2016
+median(mcmc$model2$SPB_2016)
+median(mcmc$model2$SPB_2017)
 
 
 
