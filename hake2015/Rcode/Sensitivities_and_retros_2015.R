@@ -36,27 +36,62 @@ endyrvec <- retroSummary$endyrs + 1 + 0:-15
 SSplotComparisons(retroSummary, endyrvec=endyrvec,
                   legendlabels=paste("Data",0:-15,"years"))
 
+# squid plot
 ht <- 3.75; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"squidPlot_2015.png"),
                height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(4,4,1,1)+0.1)
 SSplotRetroRecruits(retroSummary,endyrvec,cohorts=1999:2012,ylim=NULL,uncertainty=FALSE,
-           main="",
-           mcmcVec=FALSE,devs=TRUE,
-           relative=FALSE,labelyears=TRUE,legend=FALSE,leg.ncols=4)
+                    main="", mcmcVec=FALSE, devs=TRUE, relative=FALSE,
+                    labelyears=TRUE,legend=FALSE,leg.ncols=4)
 if(doPNG) {dev.off()}
 
+# squid plot of recruit dev strength relative to most recent estimate
 ht <- 3.75; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"squidPlot_relative_2015.png"),
                height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(4,4,1,1)+0.1)
-SSplotRetroRecruits(retroSummary,endyrvec,cohorts=1999:2012,ylim=NULL,uncertainty=FALSE,
-           main="",
-           mcmcVec=FALSE,devs=TRUE,
-           relative=TRUE,labelyears=TRUE,legend=FALSE,leg.ncols=4)
+tmp <- SSplotRetroRecruits(retroSummary,endyrvec,cohorts=1999:2012,ylim=NULL,uncertainty=FALSE,
+                           main="", mcmcVec=FALSE, devs=TRUE, relative=TRUE,
+                           labelyears=TRUE, legend=FALSE,leg.ncols=4)
 if(doPNG) {dev.off()}
+
+
+### retro plot with MCMC
+base <- SS_output(dir=file.path(SSdir,"2015hake_basePreSRG"))
+mcmc <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=FALSE)
+if(nrow(mcmc$model1)!=999){
+  stop("MCMC is not 999 rows! Make sure you did this on purpose.")
+}
+base$mcmc <- data.frame(mcmc$model1)
+
+# repeating base model, which isn't ideal, but quicker
+retro.list <- list(base, base, base, base, base, base)
+retro.summ <- SSsummarize(retro.list)
+retro.summ$mcmc[[1]] <- base$mcmc
+for(i in 1:5){
+  retro.summ$mcmc[[i+1]] <- SSgetMCMC(dir=file.path(SSdir,
+                                        paste0("2015hake_basePreSRG_retros/retro-",i)))[[1]]
+}
+# retro plot
+retro_names <- c("Base model",
+                 "-1 year",
+                 paste(-2:-5,"year"))
+dir.create(file.path(figDir, "retro_plots"))
+SSplotComparisons(retro.summ,legendlabels=retro_names,
+                  plotdir=file.path(figDir, "retro_plots"),
+                  mcmc=rep(TRUE,6),
+                  png=TRUE,
+                  plot=FALSE,
+                  indexUncertainty=TRUE,
+                  spacepoints=3000, # this removes points on lines
+                  labels=comparisonLabels, # change label on spawn bio plot
+                  endyr=2015-0:5,new=F,minbthresh=0,btarg=-0.4,
+                  subplots=1:20,legendloc="top",legendncol=2,
+                  pwidth=6.5, pheight=3.75, ptsize=10,
+                  par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
 
 
 
@@ -67,18 +102,76 @@ if (!exists("base")){
 }
 
 ### read sensitivities
-sens_autoCorRecr     <- SS_output(dir=file.path(SSdir,
+# autocorrelation
+sens_autoCorRecr     <- SS_output(dir=file.path(SSdir,"Sensitivities",
                                       "2015hake_basePreSRG_sens_autoCorRecr"))
-sens_constantWtAtAge <- SS_output(dir=file.path(SSdir,
+sens_autoCorRecr2    <- SS_output(dir=file.path(SSdir,"Sensitivities",
+                                      "2015hake_basePreSRG_sens_autoCorRecr_-0.3"))
+sens_constantWtAtAge <- SS_output(dir=file.path(SSdir,"Sensitivities",
                                       "2015hake_basePreSRG_sens_constantWtAtAge"))
-sens_LorenzenM       <- SS_output(dir=file.path(SSdir,
+# lorenzen M
+sens_LorenzenM       <- SS_output(dir=file.path(SSdir,"Sensitivities",
                                       "2015hake_basePreSRG_sens_LorenzenM"))
-sens_Squid1_add      <- SS_output(dir=file.path(SSdir,
+# humboldt squid stuff
+sens_Squid1_add      <- SS_output(dir=file.path(SSdir,"Sensitivities",
                                       "2015hake_basePreSRG_sens_Squid1_age0-4add"))
-sens_Squid2          <- SS_output(dir=file.path(SSdir,
+sens_Squid2          <- SS_output(dir=file.path(SSdir,"Sensitivities",
                                       "2015hake_basePreSRG_sens_Squid2"))
-sens_Squid1_mult     <- SS_output(dir=file.path(SSdir,
+sens_Squid1_mult     <- SS_output(dir=file.path(SSdir,"Sensitivities",
                                       "2015hake_basePreSRG_sens_Squid1_age0-4mult"))
+# survey stuff
+sens_surv_low2013    <- SS_output(dir=file.path(SSdir,"Sensitivities",
+                                      "2015hake_basePreSRG_sens_lower2013survey"))
+sens_surv_low2013no2009 <- SS_output(dir=file.path(SSdir,"Sensitivities",
+                                         "2015hake_basePreSRG_sens_no2009survey_lower2013survey"))
+sens_surv_no2009     <- SS_output(dir=file.path(SSdir,"Sensitivities",
+                                      "2015hake_basePreSRG_sens_no2009survey"))
+
+# comparison of survey sensitivities
+sens_surv_summary <- SSsummarize(list(base, sens_surv_no2009, sens_surv_low2013,
+                                      sens_surv_low2013no2009))
+sens_surv_names <- c("Base model",
+                     "No 2009 survey",
+                     "Reduced 2013 survey",
+                     "No 2009 survey and reduced 2013 survey")
+colvec <- c(1,2,3,4)
+SSplotComparisons(sens_surv_summary,legendlabels=sens_surv_names,
+                  plotdir=file.path(figDir, "sensitivities_surveys"),
+                  png=TRUE,
+                  plot=FALSE,
+                  indexUncertainty=TRUE,
+                  spacepoints=3000, # this removes points on lines
+                  labels=comparisonLabels, # change label on spawn bio plot
+                  endyr=endYr,new=F,minbthresh=0,btarg=-0.4,
+                  subplots=1:20,col=colvec,legendloc="topleft",
+                  pwidth=6.5, pheight=3.75, ptsize=10,
+                  par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
+
+# comparison of autocorellation sensitivities
+sens_autoCor_summary <- SSsummarize(list(base,
+                                         sens_autoCorRecr,
+                                         sens_autoCorRecr2))
+autCorEst <- sens_autoCorRecr$parameters["SR_autocorr","Value"]
+autCorFix <- sens_autoCorRecr2$parameters["SR_autocorr","Value"]
+sens_autoCor_names <- c("Base model",
+                     paste("Estimated recruit. autocor. =",round(autCorEst,2)),
+                     paste("Fixed recruit. autocor. =",round(autCorFix,2)))
+colvec <- c(1,2,4)
+dir.create(file.path(figDir, "sensitivities_autoCor"))
+SSplotComparisons(sens_autoCor_summary,legendlabels=sens_autoCor_names,
+                  plotdir=file.path(figDir, "sensitivities_autoCor"),
+                  png=TRUE,
+                  plot=FALSE,
+                  indexUncertainty=TRUE,
+                  spacepoints=3000, # this removes points on lines
+                  labels=comparisonLabels, # change label on spawn bio plot
+                  endyr=endYr,new=F,minbthresh=0,btarg=-0.4,
+                  subplots=1:20,col=colvec,legendloc="topleft",
+                  pwidth=6.5, pheight=3.75, ptsize=10,
+                  par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
+
+
+
 
 # plot of mortality over time for squid models
 plot(0,xlim=c(1966,2014),ylim=c(0,0.4),type='n',xlab='Year',ylab='M')
