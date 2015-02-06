@@ -2,6 +2,9 @@
 
 stop("\n  This file should not be sourced!")
 
+#devtools::install_github('r4ss/r4ss')
+require(r4ss)
+
 # paths on Ian's computers (other folks can add their own statements)
 if (system("hostname", intern=TRUE) %in% c("NWCDW01724920","NWCLW01724829","ian-THINK") ){
   hakedir <- "C:/SS/hake/Hake_2015/"
@@ -18,6 +21,45 @@ comparisonLabels <-
     "Minimum stock size threshold",
     "Female spawning biomass (million t)", # this value changed for hake 2015
     "Harvest rate")
+
+### run retrospective analyses
+# note: don't run this in your main directory--make a copy in case something goes wrong
+retrodir <- "C:/ss/hake/Hake_2015/Models/2015hake_basePreSRG_retroMLE"
+
+## retrospective analyses
+SS_doRetro(masterdir=retrodir, oldsubdir="", newsubdir="retrospectives", years=0:-15)
+
+retroModels <- SSgetoutput(dirvec=file.path(retrodir, "retrospectives",
+                               paste0("retro",0:-15)))
+retroSummary <- SSsummarize(retroModels[1:15])
+endyrvec <- retroSummary$endyrs + 1 + 0:-15
+SSplotComparisons(retroSummary, endyrvec=endyrvec,
+                  legendlabels=paste("Data",0:-15,"years"))
+
+ht <- 3.75; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"squidPlot_2015.png"),
+               height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+par(mar=c(4,4,1,1)+0.1)
+SSplotRetroRecruits(retroSummary,endyrvec,cohorts=1999:2012,ylim=NULL,uncertainty=FALSE,
+           main="",
+           mcmcVec=FALSE,devs=TRUE,
+           relative=FALSE,labelyears=TRUE,legend=FALSE,leg.ncols=4)
+if(doPNG) {dev.off()}
+
+ht <- 3.75; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"squidPlot_relative_2015.png"),
+               height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+par(mar=c(4,4,1,1)+0.1)
+SSplotRetroRecruits(retroSummary,endyrvec,cohorts=1999:2012,ylim=NULL,uncertainty=FALSE,
+           main="",
+           mcmcVec=FALSE,devs=TRUE,
+           relative=TRUE,labelyears=TRUE,legend=FALSE,leg.ncols=4)
+if(doPNG) {dev.off()}
+
+
+
 
 ### read base model if not already in workspace from other code
 if (!exists("base")){
@@ -66,6 +108,14 @@ baseMval <- round(base$parameters["NatM_p_1_Fem_GP_1","Value"],3)
 sens_M_names <- c(paste0("Base model (M estimated at ",baseMval,")"),
                   "Lorenzen M (decreasing with age)",
                   "M related to Humboldt Squid")
+
+SSplotComparisons(sens_M_summary,legendlabels=sens_M_names,
+                  spacepoints=3000, # this removes points on lines
+                  labels=comparisonLabels, # change label on spawn bio plot
+                  endyr=endYr,new=F,minbthresh=0,btarg=-0.4,
+                  subplots=4,col=colvec,legendloc="topright",
+                  pwidth=6.5, pheight=3.75, ptsize=10,
+                  par=list(las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
 
 colvec <- c(1,4,2)
 
