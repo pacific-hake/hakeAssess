@@ -101,29 +101,31 @@ median(mcmc$model2$SPB_2017)
 
 #Decision tables
 #Create decision table runs (copy base into folders and insert fixed catch)
-SSdir <- "Models"
-baseName <- "2015hake_basePreSRG_mcmc"
-baseFolder <- file.path(SSdir,baseName)
-decFolder <- paste(baseFolder,"decisionTable",sep="_")
-dir.create(decFolder)
+if(F) {
+  SSdir <- "Models"
+  baseName <- "2015hake_basePreSRG_mcmc"
+  baseFolder <- file.path(SSdir,baseName)
+  decFolder <- paste(baseFolder,"decisionTable",sep="_")
+  dir.create(decFolder)
 
-decNames <- c("0","medBsame","300","428","stableCatch","SPR100","defaultHR")
-catchLevels <- list(c(0.01,0.01,0.01), c(180000,80000,0.01), rep(300000,3), rep(428000,3),
-                    rep(710000,3), c(730000,650000,600000), c(804576,682782,0))
+  decNames <- c("0","medBsame","300","428","stableCatch","SPR100","defaultHR")
+  catchLevels <- list(c(0.01,0.01,0.01), c(180000,80000,0.01), rep(300000,3), rep(428000,3),
+                      rep(710000,3), c(730000,650000,600000), c(804576,682782,0))
 
-for(ii in 1:length(decNames)) {
-  i <- decNames[ii]
-  newFolder <- file.path(decFolder,paste(ii,baseName,i,sep="_"))
-  dir.create(newFolder)
-  file.copy(file.path(baseFolder,list.files(baseFolder)),newFolder)
+  for(ii in 1:length(decNames)) {
+    i <- decNames[ii]
+    newFolder <- file.path(decFolder,paste(ii,baseName,i,sep="_"))
+    dir.create(newFolder)
+    file.copy(file.path(baseFolder,list.files(baseFolder)),newFolder)
 
-  #insert fixed catches into forecast file
-  foreFile <- file.path(newFolder,"forecast.ss")
-  fore <- SS_readforecast(foreFile,Nfleets=1,Nareas=1,verbose=F)
-  fore$Ncatch <- 3
-  fore$ForeCatch <- data.frame(Year=2015:2017, Seas=1, Fleet=1, Catch_or_F=catchLevels[[ii]])
-  SS_writeforecast(fore, dir = newFolder, overwrite = TRUE, verbose = F) 
-  #could potentially call ss3 -mceval from here, but for now do it manually!!!
+    #insert fixed catches into forecast file
+    foreFile <- file.path(newFolder,"forecast.ss")
+    fore <- SS_readforecast(foreFile,Nfleets=1,Nareas=1,verbose=F)
+    fore$Ncatch <- 3
+    fore$ForeCatch <- data.frame(Year=2015:2017, Seas=1, Fleet=1, Catch_or_F=catchLevels[[ii]])
+    SS_writeforecast(fore, dir = newFolder, overwrite = TRUE, verbose = F)
+    #could potentially call ss3 -mceval from here, but for now do it manually!!!
+  }
 }
 
 #Read in results and put together table
