@@ -17,7 +17,8 @@ HakeMetricsTable <- function(models,
                              dirNames,
                              year=(as.numeric(strsplit(as.character(Sys.Date()),"-")[[1]][1]))+1,
                              decPlaces=0,
-                             makePercentages=T){
+                             makePercentages=T,
+                             sort=F){
   # models is a list of mcmc results
   # year - default is the current date's year + 1 so if you run this in January 2013 then year = 2014.
 
@@ -38,7 +39,7 @@ HakeMetricsTable <- function(models,
 
   cat("Metrics table for",year,"\n")
   out <- t(as.data.frame(lapply(models,metric,year=year)))
-  out <- out[order(out[,1]),]
+  if(sort)  out <- out[order(out[,1]),]
 
   if(makePercentages){
     out[,2:7] <- out[,2:7]*100.0  # make percentages
