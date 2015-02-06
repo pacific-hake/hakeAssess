@@ -520,7 +520,7 @@ ht <- 4; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"data.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0))
-SSplotData(base,fleetnames=c("Fishery","Survey"),fleetcols=gray(.5,.8))
+SSplotData(base,fleetnames=c("Fishery","Survey"))
 if(doPNG){dev.off()}
 
 

@@ -88,8 +88,21 @@ SSplotComparisons(retro.summ,legendlabels=retro_names,
                   indexUncertainty=TRUE,
                   spacepoints=3000, # this removes points on lines
                   labels=comparisonLabels, # change label on spawn bio plot
-                  endyr=2015-0:5,new=F,minbthresh=0,btarg=-0.4,
-                  subplots=1:20,legendloc="top",legendncol=2,
+                  endyr=2015-0:5,new=F,minbthresh=0.1,btarg=0.4,
+                  subplots=1:20,legendloc="topleft",legendncol=2,
+                  pwidth=6.5, pheight=3.75, ptsize=10,
+                  par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
+# redo recruit plot to avoid legend overlap
+SSplotComparisons(retro.summ,legendlabels=retro_names,
+                  plotdir=file.path(figDir, "retro_plots"),
+                  mcmc=rep(TRUE,6),
+                  png=TRUE,
+                  plot=FALSE,
+                  indexUncertainty=TRUE,
+                  spacepoints=3000, # this removes points on lines
+                  labels=comparisonLabels, # change label on spawn bio plot
+                  endyr=2015-0:5,new=F,minbthresh=0.1,btarg=0.4,
+                  subplots=7,legendloc="topleft",legendncol=1,
                   pwidth=6.5, pheight=3.75, ptsize=10,
                   par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
 
