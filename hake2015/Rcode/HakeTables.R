@@ -75,7 +75,7 @@ SSdir <- "Models/2015hake_basePreSRG_metrics"
 modelsPath   <- file.path(SSdir)
 models       <- list.dirs(modelsPath)[-1]
 mcmc         <- SSgetMCMC(models,writecsv=F)
-metricsTable <- HakeMetricsTable(mcmc,models,year=2016)
+metricsTable <- HakeMetricsTableRisk(mcmc,models,year=2016)
 write.csv(metricsTable,"Writeup/Tables/metrics2015.csv")
 
 #SPR of 100%
@@ -89,7 +89,7 @@ SSdir <- "Models/2015hake_basePreSRG_metrics2"
 modelsPath   <- file.path(SSdir)
 models       <- list.dirs(modelsPath)[-1]
 mcmc         <- SSgetMCMC(models,writecsv=F,)
-metricsTable <- HakeMetricsTable(mcmc,models,year=2017)
+metricsTable <- HakeMetricsTableRisk(mcmc,models,year=2017)
 write.csv(metricsTable,"Writeup/Tables/metrics2016.csv")
 
 #SPR of 100%
