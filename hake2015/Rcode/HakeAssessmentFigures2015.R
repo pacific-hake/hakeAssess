@@ -221,7 +221,7 @@ SSplotIndices(base, subplot=2, add=TRUE, col3=rgb(1,0,0,.7))
 axis(1, at=base$cpue$Yr[base$cpue$Use==1], cex.axis=0.8, tcl=-0.6)
 axis(1, at=1990:2020, lab=rep("",length(1990:2020)), cex.axis=0.8, tcl=-0.3)
 box()
-axis(2, at=(0:5)*1e6, lab=0:5, las=1) 
+axis(2, at=(0:5)*1e6, lab=0:5, las=1)
 if(doPNG) {dev.off()}
 
 ###############################################################################################################
@@ -433,80 +433,6 @@ phase.fn()
 if(doPNG){dev.off()}
 
 
-#### NOTE from Ian to himself (1/29/2015 5pm): skipping forecast stuff for now
-###############3
-## Forecasts    
-models <- paste(SSdir,"2014hake_21_decisionTableRuns",c("9_2014hake_21_default","7_2014hake_21_stableCatch","5_2014hake_21_375K","1_2014hake_21_0"),sep="/")
-tmp <- SSgetMCMC(dir=models,writecsv=F)
-doPNG <- T
-mymodels <- list(base,base,base,base); modelnames <- c("Default: 872,424 t","Stable Catch: 727,000 t","375,000 t","No Fishing")
-mysummary <- SSsummarize(mymodels)
-mysummary$mcmc <- tmp
-ht <- 3.25; wd<- 6.5
-if(doPNG) {png(file.path(figDir,"forecasts.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
-if(!doPNG) {windows(width=wd,height=ht)} 
-par(mar=c(4.5,4,1,1))
-SSplotComparisons(mysummary, legendlabels=modelnames,endyr=2016,densitynames=c("Bratio_2013"),new=F,minbthresh=0,subplots=4,plot=T,mcmc=rep(T,4),xlim=c(2005,2016),legendloc="topleft",
-        labels=c("Year","Spawning biomass (t)","Spawning depletion","Age-0 recruits (1,000s)","Recruitment deviations","Index",
-                 "Log index","SPR ratio","Density","",""),btarg=-0.4,staggerpoints= 1990, spacepoints=200)
-abline(h=c(0.1,0.4),lty=2,col="grey")
-axis(2,at=c(0.1,0.4),las=1,cex.axis=0.8)
-if(doPNG){dev.off()}
-
-
-
-
-
-#draw a figure of metrics
-metrics <- read.csv("WriteUp/Tables/metricsTableRisk2015.csv")
-names(metrics)[1:2] <- c("Model","Catch")
-metrics$Catch <- metrics$Catch/1e3
-metrics <- metrics[,-1]
-metrics <- metrics[metrics$Catch<245 | metrics$Catch>255,]
-catches <- metrics$Catch
-
-doPNG <- T
-ht <- 3.75; wd<- 6.5
-if(doPNG) {png(file.path(figDir,"metrics2015.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
-if(!doPNG) {windows(width=wd,height=ht)}
-par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
-plot(metrics$Catch,metrics[,2],ylim=c(0,1),xaxt="n",ylab="Probability",xlab="Catch in 2014 ('000 t)",type="b",lty=2,pch=16)
-lines(metrics$Catch,metrics[,3],col="blue",type="b",lty=2,pch=17)
-lines(metrics$Catch,metrics[,4],col="green",type="b",lty=2,pch=17)
-lines(metrics$Catch,metrics[,5],col="orange",type="b",lty=2,pch=17)
-lines(metrics$Catch,metrics[,6],col="red",type="b",lty=2,pch=15)
-lines(metrics$Catch,metrics[,7],col="tan",type="b",lty=2,pch=18)
-abline(h=0.5,lty=2,lwd=1,col="grey")
-legend("topleft",c("P(B2015 < B2014): Stock declines in 2015","P(2014 Fishing Intensity > Target of 40%)","P(C2015 < C2014): F40% catch declines in 2015","P(B2015 < B40%)","P(B2015 < B25%)","P(B2015 < B10%)"),col=c("black","red","tan","blue","green","orange"),lty=1,lwd=2,pch=c(16,15,18,17,17,17),cex=0.7)
-axis(1,at=round(metrics$Catch,0),cex.axis=0.9,las=2)
-if(doPNG){dev.off()}
-
-metrics <- read.csv("WriteUp/Tables/metricsTableRisk2016.csv")
-names(metrics)[1:2] <- c("Model","Catch")
-metrics <- metrics[order(metrics$Catch),]
-metrics$Catch <- metrics$Catch/1e3
-metrics <- metrics[,-1]
-metrics <- metrics[metrics$Catch<245 | metrics$Catch>255,]
-catches <- metrics$Catch
-doPNG <- T
-ht <- 3.75; wd<- 6.5
-if(doPNG) {png(file.path(figDir,"metrics2016.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
-if(!doPNG) {windows(width=wd,height=ht)}
-par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
-plot(metrics$Catch,metrics[,2],ylim=c(0,1),xaxt="n",ylab="Probability",xlab="Catch in 2015 ('000 t)",type="b",lty=2,pch=16)
-lines(metrics$Catch,metrics[,3],col="blue",type="b",lty=2,pch=17)
-lines(metrics$Catch,metrics[,4],col="green",type="b",lty=2,pch=17)
-lines(metrics$Catch,metrics[,5],col="orange",type="b",lty=2,pch=17)
-lines(metrics$Catch,metrics[,6],col="red",type="b",lty=2,pch=15)
-lines(metrics$Catch,metrics[,7],col="tan",type="b",lty=2,pch=18)
-abline(h=0.5,lty=2,lwd=1,col="grey")
-legend("topleft",c("P(B2016 < B2015): Stock declines in 2016","P(2015 Fishing Intensity > Target of 40%)","P(C2016 < C2015): F40% catch declines in 2016","P(B2016 < B40%)","P(B2016 < B25%)","P(B2016 < B10%)"),col=c("black","red","tan","blue","green","orange"),lty=1,lwd=2,pch=c(16,15,18,17,17,17),cex=0.7)
-axis(1,at=round(metrics$Catch,0),cex.axis=0.9,las=2)
-if(doPNG){dev.off()}
-
-
-
-#### NOTE from Ian to himself (1/30/2015 9am): starting up again here
 
 
 #############################################################
@@ -746,7 +672,7 @@ if(doPNG) dev.off()
 
 
 #########
-# MCMC diagnostics 
+# MCMC diagnostics
 ## source("WriteUp/Rcode/mcmc.out.R")
 ## source("WriteUp/Rcode/mcmc.nuisance.R")
 
@@ -1000,7 +926,7 @@ if(doPNG) {dev.off()}
 
 tmp <- t(apply(selex,1,function(x){diff(as.numeric(x))}))
 xx <- apply(tmp<0,1,any)
-cat("MCMC samples with some dome in acoustic selectivity (out of ",nrow(tmp),"): ",sum(xx),"\n", sep="") 
+cat("MCMC samples with some dome in acoustic selectivity (out of ",nrow(tmp),"): ",sum(xx),"\n", sep="")
 ## MCMC samples with some dome in acoustic selectivity (out of 999): 939
 xxx <- apply(tmp<0,2,sum)
 data.frame(label=paste0("decline from age",1:14,"-",2:15), count=xxx)
@@ -1376,7 +1302,7 @@ if(doPNG){dev.off()}
 
 
 #############################################################
-#Retrospective plot 
+#Retrospective plot
 retro <- read.csv("Models/HakeRetro.csv",as.is=T)
 retro <- retro[retro$Value=="SB million t",]
 retro <- retro[!(retro$Model=="TINSS STAR update" | retro$Model=="TINSS Post-STAR" | retro$Model=="Base lowCI" | retro$Model=="Base highCI" ),]
@@ -1398,7 +1324,7 @@ yrs <- sort(unique(retro$Year))
 cols=c(rgb(0.1,0.1,0.44),rgb(1,0.1,0.6),rgb(1,0.8,0),rgb(0,1,1),rgb(0.5,0,0.5),rgb(0.18,0.55,0.34),rgb(0,0,0.8),rgb(0,0.8,0.8),
        rgb(0.25,0.88,0.82,0.7),rgb(0.5,1,0.8,0.7),rgb(1,0.84,0,0.7,0.7),rgb(0,0.75,1,0.7),rgb(1,0,1,0.7),rgb(0.5,0.5,0.2,1),
        rgb(0.85,0.65,0.13,0.7),rgb(0.27,0.51,0.71),rgb(0.13,0.70,0.67),rgb(1,0,1),rgb(1,0,0))
-              
+
 lwds <- c(rep(1,25),3)
 pchs <- rep(c(18,15,17,4,20,3),4) #repeat it more than necessary
 legCol <- legPch <- rep(NA,nrow(retro))
@@ -1613,7 +1539,7 @@ recdevs <- NULL
                     #grep("_InitAge_",names(mcmc[[imodel]])),
                     grep("ForeRecr_",names(mcmc[[imodel]]))))
     if(length(tmp) > 0) { #there are some mcmc values to use
-      mcmc.tmp <- mcmc[[imodel]][,tmp] # subset of columns from MCMC for this model 
+      mcmc.tmp <- mcmc[[imodel]][,tmp] # subset of columns from MCMC for this model
       mcmclabs <- names(mcmc.tmp)
       med   <- apply(mcmc.tmp,2,quantile,prob=0.5)   #hard-wired probability
       recdevs <- cbind(recdevs,med)
@@ -1780,7 +1706,7 @@ run1.2 <- SS_output(dir=file.path(SSdir,"2014hake_SRG1.1_surveyProfile/prof5"),c
 mymodels <- list(run1.2,base)
 modelnames <- c("Survey 1.8million t","base 2014")
 mysummary <- SSsummarize(mymodels)
-mysummary$mcmc <- 
+mysummary$mcmc <-
 doPNG <- F
 ht <- 3.25; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"Sensitivities/run1.2_foreCatch.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
@@ -2004,7 +1930,7 @@ allSel30 <- allSel[,-1]
 
 cexax <- 1
 doPNG <- T
-ht <- 8; wd<-6.5 
+ht <- 8; wd<-6.5
 if(doPNG) {png(file.path(figDir,"TVselexSens1.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,3),oma=c(0,1.1,0,0))

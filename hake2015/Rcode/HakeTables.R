@@ -12,6 +12,7 @@ base <- SS_output(dir=file.path(SSdir,"2015hake_basePreSRG"),covar=F)
 mcmc <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc"),writecsv=F)
 base$mcmc <- data.frame(mcmc$model1)
 
+stop("Do not source beyond this point\n")
 
 ###Executive Summary Tables
 yrs <- 2005:2015
@@ -144,6 +145,99 @@ median(tmp$model7$ForeCatch_2017)
 HakeDecisionTablesQuantiles.ex(tmp,years=2015:2017,outVar="Bratio_",quantiles=c(0.05,0.25,0.5,0.75,0.95),scalar=1,csvFileName="WriteUp/Tables/BratioDecisionTable.csv")
 HakeDecisionTablesQuantiles.ex(tmp,years=2015:2017,outVar="SPRratio_",quantiles=c(0.05,0.25,0.5,0.75,0.95),scalar=1,csvFileName="WriteUp/Tables/SPRratioDecisionTable.csv")
 
+#example of how to create a decision and metrics tables sorting on a specific parameter
+# out <- HakeDecisionTablesSort.ex(mcmc,years=2014:2015,sortVar="Recr_2010",outVar="Bratio_",percentages=c(0.1,0.8,0.1),scalar=1,csvFileName=NULL)
+# write.csv(out$metrics,file="Writeup/Tables/metrics2015Lower10.csv")
+# SSdir <- "C:/NOAA2014/Hake/Models/2014hake_21_metrics"
+# modelsPath   <- file.path(SSdir)
+# models       <- list.dirs(modelsPath)[-1]
+# mcmc         <- SSgetMCMC(models,writecsv=F)
+# out <- HakeDecisionTablesSort.ex(mcmc,years=2014:2015,sortVar="Recr_2010",outVar="Bratio_",percentages=c(0.1,0.8,0.1),scalar=1,csvFileName=NULL)
+# write.csv(out$metrics,file="Writeup/Tables/metrics2015Lower10.csv")
+
+
+
+
+##############################################################
+### Main body tables
+
+## median posterior population estimates from the base model
+yrs <- 1966:2015
+
+spb.mcmc <- DerivedQuants.ex(models=list(base),variable="SPB_",mcmc=c(T),scalar=1e3,years=yrs,probs=0.5)
+bratio.mcmc <- c(NA,DerivedQuants.ex(models=list(base),variable="Bratio_",mcmc=c(T),scalar=1e-2,years=yrs[-1],probs=0.5))
+bratio.mcmc[1] <- median(base$mcmc$SPB_1966/base$mcmc$SPB_Virgin)/1e-2
+recr.mcmc <- DerivedQuants.ex(models=list(base),variable="Recr_",mcmc=c(T),scalar=1e3,years=yrs,probs=0.5)
+spr.mcmc <- DerivedQuants.ex(models=list(base),variable="SPRratio_",mcmc=c(T),scalar=1e-2,years=yrs,probs=0.5)
+f.mcmc <- DerivedQuants.ex(models=list(base),variable="F_",mcmc=c(T),scalar=1e-2,years=yrs,probs=0.5)
+x <- data.frame(spb.mcmc,bratio.mcmc,recr.mcmc,spr.mcmc,f.mcmc)
+names(x) <- c("spb.mcmc","bratio.mcmc","recr.mcmc","spr.mcmc","f.mcmc")
+write.csv(x,file=paste(tableDir,"MainTimeSeries.csv",sep="/"))
+
+
+spb.mcmc <- DerivedQuants.ex(models=list(base),variable="SPB_",mcmc=c(T),scalar=1e3,years=yrs,probs=0.025)
+bratio.mcmc <- c(NA,DerivedQuants.ex(models=list(base),variable="Bratio_",mcmc=c(T),scalar=1e-2,years=yrs[-1],probs=0.025))
+bratio.mcmc[1] <- quantile(base$mcmc$SPB_1966/base$mcmc$SPB_Virgin,prob=0.025)/1e-2
+recr.mcmc <- DerivedQuants.ex(models=list(base),variable="Recr_",mcmc=c(T),scalar=1e3,years=yrs,probs=0.025)
+spr.mcmc <- DerivedQuants.ex(models=list(base),variable="SPRratio_",mcmc=c(T),scalar=1e-2,years=yrs,probs=0.025)
+f.mcmc <- DerivedQuants.ex(models=list(base),variable="F_",mcmc=c(T),scalar=1e-2,years=yrs,probs=0.025)
+xLo <- data.frame(spb.mcmc,bratio.mcmc,recr.mcmc,spr.mcmc,f.mcmc)
+names(xLo) <- c("spb.mcmc","bratio.mcmc","recr.mcmc","spr.mcmc","f.mcmc")
+
+spb.mcmc <- DerivedQuants.ex(models=list(base),variable="SPB_",mcmc=c(T),scalar=1e3,years=yrs,probs=0.975)
+bratio.mcmc <- c(NA,DerivedQuants.ex(models=list(base),variable="Bratio_",mcmc=c(T),scalar=1e-2,years=yrs[-1],probs=0.975))
+bratio.mcmc[1] <- quantile(base$mcmc$SPB_1966/base$mcmc$SPB_Virgin,prob=0.975)/1e-2
+recr.mcmc <- DerivedQuants.ex(models=list(base),variable="Recr_",mcmc=c(T),scalar=1e3,years=yrs,probs=0.975)
+spr.mcmc <- DerivedQuants.ex(models=list(base),variable="SPRratio_",mcmc=c(T),scalar=1e-2,years=yrs,probs=0.975)
+f.mcmc <- DerivedQuants.ex(models=list(base),variable="F_",mcmc=c(T),scalar=1e-2,years=yrs,probs=0.975)
+xHi <- data.frame(spb.mcmc,bratio.mcmc,recr.mcmc,spr.mcmc,f.mcmc)
+names(xHi) <- c("spb.mcmc","bratio.mcmc","recr.mcmc","spr.mcmc","f.mcmc")
+
+x <- data.frame(spb=paste(round(xLo[,1],0),"-",round(xHi[,1],0),sep=""),
+                bratio=paste(round(xLo[,2],0),"-",round(xHi[,2],0),"%",sep=""),
+                recr=paste(round(xLo[,3],0),"-",round(xHi[,3],0),sep=""),
+                spr=paste(round(xLo[,4],0),"-",round(xHi[,4],0),"%",sep=""),
+                f=paste(round(xLo[,5],0),"-",round(xHi[,5],0),"%",sep=""))
+
+write.csv(x,file=paste(tableDir,"MainTimeSeriesCI.csv",sep="/"))
+
+ind <- base$natage$Time%in%(1966:2015)
+tmp <- apply(base$natage[as.character(15:20)],1,sum)
+write.csv(cbind(base$natage[ind,as.character(0:14)],tmp[ind])/1e3,file=paste(tableDir,"MLEnumAtAge.csv",sep="/"))
+########################################################################################################################
+
+
+
+####################################
+#MLE vs MCMC
+mymodels <- list(base)
+models <- SSsummarize(mymodels)
+models$mcmc <- vector(mode="list",length=length(mymodels))  #create the mcmc list of model dataframes
+models$mcmc <- list(base$mcmc)
+
+nombres <- c("Recr_Virgin","SR_BH_steep","NatM_p_1_Fem_GP_1","Q","Q_extraSD_2_Acoustic_Survey",
+    "Recr_2008","Recr_2010","SPB_Virgin","Bratio_2009","Bratio_2015","SPRratio_2014",
+    "SSB_SPRtgt","Fstd_SPRtgt","TotYield_SPRtgt")
+
+#tableDir <- "WriteUp/Tables"
+modelnames <- c("MLE")
+mle <- SStableComparisons(models,modelnames=modelnames,
+    names=nombres,
+    #csv=TRUE,csvdir=tableDir,csvfile="mleTable.csv",mcmc=F
+)
+modelnames <- c("MCMC")
+mcmc <- SStableComparisons(models,modelnames=modelnames,
+    names=nombres,mcmc=T
+    #csv=TRUE,csvdir=tableDir,csvfile="mcmcTable.csv"
+)
+
+tmpNames <- mcmc[,1]
+mle <- mle[-c(1:4),-1]
+mcmc <- mcmc[,-1]
+out <- data.frame(mle,mcmc)
+rownames(out) <- tmpNames
+write.csv(out,file="WriteUp/Tables/mleVsMcmcTable.csv")
+##########################################################
 
 
 
@@ -169,12 +263,6 @@ HakeDecisionTablesQuantiles.ex(tmp,years=2015:2017,outVar="SPRratio_",quantiles=
 
 
 
-
-
-
-
-out <- HakeDecisionTablesSort.ex(mcmc,years=2014:2015,sortVar="Recr_2010",outVar="Bratio_",percentages=c(0.1,0.8,0.1),scalar=1,csvFileName=NULL)
-write.csv(out$metrics,file="Writeup/Tables/metrics2015Lower10.csv")
 
 
 
@@ -248,138 +336,9 @@ recr.mcmc <- DerivedQuants.ex(models=list(base),variable="Late_RecrDev_",mcmc=c(
 
 
 
-################################################################################
-### Quantile table
-source("C:/NOAA2014/Hake/WriteUp/Rcode/HakeTableFunctions.R")
-decDir <- "Models/2014hake_21_decisionTableRuns"
-models <- dir(decDir)
-tmp <- SSgetMCMC(dir=file.path(decDir,models),writecsv=F)
-
-#To find out the median catch for the default harvest rate, have to iteratively do this and enter in forecast file
-#xx <- SSgetMCMC(dir=file.path(decDir,"2014hake_21_default"),writecsv=F)
-#range(xx[[1]]$ForeCatch_2014)
-#median(xx[[1]]$ForeCatch_2014)
-#range(xx[[1]]$ForeCatch_2015)
-#median(xx[[1]]$ForeCatch_2015)
-#range(xx[[1]]$ForeCatch_2016)
-#median(xx[[1]]$ForeCatch_2016)
-
-#xx <- SSgetMCMC(dir=file.path(decDir,"4_2014hake_21_stableSSB"),writecsv=F)
-#median(xx[[1]]$ForeCatch_2014)
-#median(xx[[1]]$SPB_2014)
-#median(xx[[1]]$SPB_2015)
-
-#xx <- SSgetMCMC(dir=file.path(decDir,"2014hake_21_stableCatch"),writecsv=F)
-#median(xx[[1]]$ForeCatch_2014)
-#median(xx[[1]]$ForeCatch_2015)
-
-#xx <- SSgetMCMC(dir=file.path(decDir,"2014hake_21_incrDecr"),writecsv=F)
-#median(xx[[1]]$ForeCatch_2014)
-#sum(xx[[1]]$SPB_2014 < xx[[1]]$SPB_2015)/nrow(xx[[1]])
-
-#xx <- SSgetMCMC(dir=file.path(decDir,"8_2014hake_21_50percSPR"),writecsv=F)
-#median(xx[[1]]$SPRratio_2014)
-#median(xx[[1]]$SPRratio_2015)
-
-
-HakeDecisionTablesQuantiles.ex(tmp,years=2014:2016,outVar="Bratio_",quantiles=c(0.05,0.25,0.5,0.75,0.95),scalar=1,csvFileName="WriteUp/Tables/BratioDecisionTable.csv")
-HakeDecisionTablesQuantiles.ex(tmp,years=2014:2016,outVar="SPRratio_",quantiles=c(0.05,0.25,0.5,0.75,0.95),scalar=1,csvFileName="WriteUp/Tables/SPRratioDecisionTable.csv")
-
-lapply(tmp,function(x){median(x$ForeCatch_2015)})
-lapply(tmp,function(x){median(x$ForeCatch_2016)})
-
-metDir <- "Models/2014hake_21_metrics"
-models <- dir(metDir)
-xx <- SSgetMCMC(dir=file.path(metDir,models),writecsv=F)
-metricsTable <- HakeDecisionTablesSort.ex(xx,years=2014:2015,sortVar="Recr_2010",outVar="Bratio_",percentages=c(0,1),scalar=1,csvFileName=NULL)
-#metricsTable <- HakeMetricsTableRisk2(xx,year=2015,decPlaces=4)
-write.csv(metricsTable$metrics[rownames(metricsTable$metrics)=="1",],"WriteUp/Tables/metricsTableRisk2015.csv",quote=F)
-
-metDir <- "Models/2014hake_21_metrics2"
-models <- dir(metDir)
-xx <- SSgetMCMC(dir=file.path(metDir,models),writecsv=F)
-#metricsTable <- HakeMetricsTableRisk2(xx,year=2016,decPlaces=4)
-metricsTable <- HakeDecisionTablesSort.ex(xx,years=2015:2016,sortVar="Recr_2010",outVar="Bratio_",percentages=c(0,1),scalar=1,csvFileName=NULL)
-write.csv(metricsTable$metrics[rownames(metricsTable$metrics)=="1",],"WriteUp/Tables/metricsTableRisk2016.csv",quote=F)
-
-
-###################################################################################################
-### Decision tables on 2010 Recruitment
-############
-#Decision table based on lower 10% of 2010 recruitment
-#source("C:/NOAA2014/Hake/WriteUp/Rcode/HakeTableFunctions.R")
-setwd("C:/NOAA2014/Hake")
-source("WriteUp/Rcode/HakeTableFunctions.R")
-source("WriteUp/Rcode/makeMetricsTable.r")
-decDir <- "Models/2014hake_21_decisionTableRuns"
-models <- dir(decDir)
-tmp <- SSgetMCMC(dir=file.path(decDir,models),writecsv=F)
-
-###THE SORTING OF CATCH IS BY CHAARCTER, NOT NUMERIC. MANUALLY resort FIX FOR NOW
-out <- HakeDecisionTablesSort.ex(tmp,years=2014:2016,sortVar="Recr_2010",outVar="Bratio_",percentages=c(0.1,0.8,0.1),scalar=1,csvFileName="WriteUp/Tables/BratioLower10.csv")
-out <- HakeDecisionTablesSort.ex(tmp,years=2014:2016,sortVar="Recr_2010",outVar="SPRratio_",percentages=c(0.1,0.8,0.1),scalar=1,csvFileName="WriteUp/Tables/SPRratioLower10.csv")
-
-SSdir <- "C:/NOAA2014/Hake/Models/2014hake_21_metrics"
-modelsPath   <- file.path(SSdir)
-models       <- list.dirs(modelsPath)[-1]
-mcmc         <- SSgetMCMC(models,writecsv=F)
-out <- HakeDecisionTablesSort.ex(mcmc,years=2014:2015,sortVar="Recr_2010",outVar="Bratio_",percentages=c(0.1,0.8,0.1),scalar=1,csvFileName=NULL)
-write.csv(out$metrics,file="Writeup/Tables/metrics2015Lower10.csv")
-
-SSdir <- "C:/NOAA2014/Hake/Models/2014hake_21_metrics2"
-modelsPath   <- file.path(SSdir)
-models       <- list.dirs(modelsPath)[-1]
-mcmc         <- SSgetMCMC(models,writecsv=F)
-out <- HakeDecisionTablesSort.ex(mcmc,years=2015:2016,sortVar="Recr_2010",outVar="Bratio_",percentages=c(0.1,0.8,0.1),scalar=1,csvFileName=NULL)
-write.csv(out$metrics,file="Writeup/Tables/metrics2016Lower10.csv")
-
-
-################################################################################
-### Quantile table (10 year projection)
-source("C:/NOAA2014/Hake/WriteUp/Rcode/HakeTableFunctions.R")
-decDir <- "Models/2014hake_21_10yrFore_decisionTable"
-models <- dir(decDir)
-tmp <- SSgetMCMC(dir=file.path(decDir,models),writecsv=F)
-
-HakeDecisionTablesQuantiles.ex(tmp,years=2014:2023,outVar="Bratio_",quantiles=c(0.05,0.25,0.5,0.75,0.95),scalar=1,csvFileName="WriteUp/Tables/BratioDecisionTable_10year.csv")
-HakeDecisionTablesQuantiles.ex(tmp,years=2014:2023,outVar="SPRratio_",quantiles=c(0.05,0.25,0.5,0.75,0.95),scalar=1,csvFileName="WriteUp/Tables/SPRratioDecisionTable_10year.csv")
 
 
 
-
-
-
-#MLE vs MCMC
-####################################
-#MLE vs MCMC
-mymodels <- list(base)
-models <- SSsummarize(mymodels)
-models$mcmc <- vector(mode="list",length=length(mymodels))  #create the mcmc list of model dataframes
-models$mcmc <- list(base$mcmc)
-
-tableDir <- "C:\\NOAA2014\\Hake\\WriteUp\\Tables"
-modelnames <- c("MLE")
-SStableComparisons(models,modelnames=modelnames,
-    names=c("Recr_Virgin","SR_BH_steep","NatM_p_1_Fem_GP_1","Q","Q_extraSD_2_Acoustic_Survey",
-    "Recr_2008","Recr_2010","SPB_Virgin","Bratio_2013","SPRratio_2012",
-    "SSB_Btgt","SPR_Btgt","Fstd_Btgt","TotYield_Btgt",
-    "SSB_SPRtgt","Fstd_SPRtgt","TotYield_SPRtgt",
-    "SSB_MSY","SPR_MSY","Fstd_MSY","TotYield_MSY"),
-    csv=TRUE,
-    csvdir=tableDir,
-    csvfile="mleTable.csv",mcmc=F
-)
-modelnames <- c("MLE")
-SStableComparisons(models,modelnames=modelnames,
-    names=c("Recr_Virgin","SR_BH_steep","NatM_p_1_Fem_GP_1","Q","Q_extraSD_2_Acoustic_Survey",
-    "Recr_2008","Recr_2010","SPB_Virgin","Bratio_2013","SPRratio_2012",
-    "SSB_Btgt","SPR_Btgt","Fstd_Btgt","TotYield_Btgt",
-    "SSB_SPRtgt","Fstd_SPRtgt","TotYield_SPRtgt",
-    "SSB_MSY","SPR_MSY","Fstd_MSY","TotYield_MSY"),
-    csv=TRUE,
-    csvdir=tableDir,
-    csvfile="mcmcTable.csv",mcmc=T
-)
 
 
 rbind(DerivedQuants.ex(models=list(base),variable="Recr_",mcmc=c(F),scalar=1e6,years="Virgin",probs=c(0.025,0.5,0.975)),
@@ -480,51 +439,6 @@ dev.off()
 
 
 ###Main Doc Medians
-
-yrs <- 1966:2014
-
-tableDir <- "WriteUp/Tables"
-
-spb.mcmc <- DerivedQuants.ex(models=list(base),variable="SPB_",mcmc=c(T),scalar=1e6,years=yrs,probs=0.5)
-bratio.mcmc <- c(NA,DerivedQuants.ex(models=list(base),variable="Bratio_",mcmc=c(T),scalar=1,years=yrs[-1],probs=0.5))
-bratio.mcmc[1] <- median(base$mcmc$SPB_1966/base$mcmc$SPB_Virgin)
-recr.mcmc <- DerivedQuants.ex(models=list(base),variable="Recr_",mcmc=c(T),scalar=1e6,years=yrs,probs=0.5)
-spr.mcmc <- DerivedQuants.ex(models=list(base),variable="SPRratio_",mcmc=c(T),scalar=1,years=yrs,probs=0.5)
-f.mcmc <- DerivedQuants.ex(models=list(base),variable="F_",mcmc=c(T),scalar=1,years=yrs,probs=0.5)
-x <- data.frame(spb.mcmc,bratio.mcmc,recr.mcmc,spr.mcmc,f.mcmc)
-names(x) <- c("spb.mcmc","bratio.mcmc","recr.mcmc","spr.mcmc","f.mcmc")
-write.csv(x,file=paste(tableDir,"MainTimeSeries.csv",sep="/"))
-
-
-spb.mcmc <- DerivedQuants.ex(models=list(base),variable="SPB_",mcmc=c(T),scalar=1e6,years=yrs,probs=0.025)
-bratio.mcmc <- c(NA,DerivedQuants.ex(models=list(base),variable="Bratio_",mcmc=c(T),scalar=1,years=yrs[-1],probs=0.025))
-bratio.mcmc[1] <- quantile(base$mcmc$SPB_1966/base$mcmc$SPB_Virgin,prob=0.025)
-recr.mcmc <- DerivedQuants.ex(models=list(base),variable="Recr_",mcmc=c(T),scalar=1e6,years=yrs,probs=0.025)
-spr.mcmc <- DerivedQuants.ex(models=list(base),variable="SPRratio_",mcmc=c(T),scalar=1,years=yrs,probs=0.025)
-f.mcmc <- DerivedQuants.ex(models=list(base),variable="F_",mcmc=c(T),scalar=1,years=yrs,probs=0.025)
-xLo <- data.frame(spb.mcmc,bratio.mcmc,recr.mcmc,spr.mcmc,f.mcmc)
-names(xLo) <- c("spb.mcmc","bratio.mcmc","recr.mcmc","spr.mcmc","f.mcmc")
-
-spb.mcmc <- DerivedQuants.ex(models=list(base),variable="SPB_",mcmc=c(T),scalar=1e6,years=yrs,probs=0.975)
-bratio.mcmc <- c(NA,DerivedQuants.ex(models=list(base),variable="Bratio_",mcmc=c(T),scalar=1,years=yrs[-1],probs=0.975))
-bratio.mcmc[1] <- quantile(base$mcmc$SPB_1966/base$mcmc$SPB_Virgin,prob=0.975)
-recr.mcmc <- DerivedQuants.ex(models=list(base),variable="Recr_",mcmc=c(T),scalar=1e6,years=yrs,probs=0.975)
-spr.mcmc <- DerivedQuants.ex(models=list(base),variable="SPRratio_",mcmc=c(T),scalar=1,years=yrs,probs=0.975)
-f.mcmc <- DerivedQuants.ex(models=list(base),variable="F_",mcmc=c(T),scalar=1,years=yrs,probs=0.975)
-xHi <- data.frame(spb.mcmc,bratio.mcmc,recr.mcmc,spr.mcmc,f.mcmc)
-names(xHi) <- c("spb.mcmc","bratio.mcmc","recr.mcmc","spr.mcmc","f.mcmc")
-
-x <- data.frame(spb=paste(round(xLo[,1],3),"-",round(xHi[,1],3),sep=""),
-                bratio=paste(round(xLo[,2],3),"-",round(xHi[,2],3),sep=""),
-                recr=paste(round(xLo[,3],3),"-",round(xHi[,3],3),sep=""),
-                spr=paste(round(xLo[,4],3),"-",round(xHi[,4],3),sep=""),
-                f=paste(round(xLo[,5],3),"-",round(xHi[,5],3),sep=""))
-
-write.csv(x,file=paste(tableDir,"MainTimeSeriesCI.csv",sep="/"))
-
-ind <- base$natage$Time%in%(1966:2014)
-tmp <- apply(base$natage[as.character(15:20)],1,sum)
-write.csv(cbind(base$natage[ind,as.character(0:14)],tmp[ind])/1e6,file=paste(tableDir,"MLEnumAtAge.csv",sep="/"))
 
 
 
