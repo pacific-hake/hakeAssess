@@ -27,8 +27,9 @@ comparisonLabels <-
 retrodir <- "C:/ss/hake/Hake_2015/Models/2015hake_basePreSRG_retroMLE"
 
 ## retrospective analyses
-SS_doRetro(masterdir=retrodir, oldsubdir="", newsubdir="retrospectives", years=0:-15)
-
+if(FALSE){ # don't run a bunch of models by accident
+  SS_doRetro(masterdir=retrodir, oldsubdir="", newsubdir="retrospectives", years=0:-15)
+}
 retroModels <- SSgetoutput(dirvec=file.path(retrodir, "retrospectives",
                                paste0("retro",0:-15)))
 retroSummary <- SSsummarize(retroModels[1:15])
@@ -75,10 +76,16 @@ for(i in 1:5){
   retro.summ$mcmc[[i+1]] <- SSgetMCMC(dir=file.path(SSdir,
                                         paste0("2015hake_basePreSRG_retros/retro-",i)))[[1]]
 }
-# retro plot
+# retro names
 retro_names <- c("Base model",
                  "-1 year",
                  paste(-2:-5,"year"))
+# retro table
+compareHakeTable(retro.summ, modelnames=retro_names,
+                 csv=FALSE, models = "all",
+                 mcmc=TRUE)
+
+# retro plot
 dir.create(file.path(figDir, "retro_plots"))
 SSplotComparisons(retro.summ,legendlabels=retro_names,
                   plotdir=file.path(figDir, "retro_plots"),
@@ -139,6 +146,24 @@ sens_surv_low2013no2009 <- SS_output(dir=file.path(SSdir,"Sensitivities",
                                          "2015hake_basePreSRG_sens_no2009survey_lower2013survey"))
 sens_surv_no2009     <- SS_output(dir=file.path(SSdir,"Sensitivities",
                                       "2015hake_basePreSRG_sens_no2009survey"))
+
+# table of many sensitivities
+sens_summary <- SSsummarize(list(base,
+                                 sens_LorenzenM,
+                                 sens_Squid1_mult,
+                                 sens_constantWtAtAge,
+                                 sens_autoCorRecr,
+                                 sens_surv_low2013))
+sens_names <- c("Base model",
+                     "Lorenzen M (decreasing with age)",
+                     "M related to Humboldt Squid",
+                     "Time-invariance weight at age",
+                     "Reduced 2013 survey",
+                     "Lower 2013 survey")
+# retro table
+compareHakeTable(sens_summary, modelnames=sens_names,
+                 csv=FALSE, models = "all",
+                 mcmc=FALSE)
 
 # comparison of survey sensitivities
 sens_surv_summary <- SSsummarize(list(base, sens_surv_no2009, sens_surv_low2013,
