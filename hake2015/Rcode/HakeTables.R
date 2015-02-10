@@ -240,6 +240,65 @@ write.csv(out,file="WriteUp/Tables/mleVsMcmcTable.csv")
 ##########################################################
 
 
+###################################################################################
+# Appendix of parameter estimates
+
+yrs <- 1966:2015
+
+apply(base$mcmc[,3:207],2,median)
+write.csv(as.matrix(apply(base$mcmc[,3:207],2,median)),file="WriteUp/Tables/params.csv",)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1473,13 +1532,3 @@ cbind(apply(x,2,median))
 
 
 
-setwd("C:/NOAA2013/Hake")
-SSdir <- "C:\\NOAA2013\\Hake\\Models"
-base <- SS_output(dir=paste(SSdir,"2013hake_19",sep="/"),covar=F)
-mcmc <- SSgetMCMC(dir=paste(SSdir,"2013hake_19_mcmc",sep="/"),writecsv=F)
-base$mcmc <- data.frame(mcmc$model1)
-
-yrs <- 1966:2014
-
-apply(base$mcmc[,3:85],2,median)
-write.csv(as.matrix(apply(base$mcmc[,3:85],2,median)),file="WriteUp/Tables/params.csv",)
