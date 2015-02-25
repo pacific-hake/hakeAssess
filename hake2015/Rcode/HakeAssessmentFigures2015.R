@@ -199,9 +199,7 @@ axis(1,at=ests$Year,cex.axis=0.8)
 if(doPNG) {dev.off()}
 
 #################################
-# Acoustic survey fits
-# Acoustic survey
-# Biomass estimate
+## Acoustic survey fits
 
 doPNG <- T
 ht<-4;wd=6.5
@@ -223,6 +221,47 @@ axis(1, at=1990:2020, lab=rep("",length(1990:2020)), cex.axis=0.8, tcl=-0.3)
 box()
 axis(2, at=(0:5)*1e6, lab=0:5, las=1)
 if(doPNG) {dev.off()}
+
+
+#################################
+## Acoustic survey fits with MCMC
+## (requires lots of additional calculations to create cpue.table
+
+doPNG <- T
+ht<-4;wd=6.5
+if(doPNG) {png(file.path(figDir,"acousticBioFit_withMCMC.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(height=ht,width=wd)}
+par(las=1,mar=c(5, 4, 1, 1) + 0.1,cex.axis=0.9)
+plot(0, type='n', xlim=c(1994,2014), xaxs='i', ylim=c(0,5.5e6), yaxs='i', axes=FALSE,
+     xlab="Year",ylab="Biomass index (million t)")
+cpue <- dat$CPUE[dat$CPUE$index > 0,]
+segments(x0 = cpue$year,
+         y0=qlnorm(.025,meanlog=log(cpue$ob),sdlog=cpue$se_log),
+         y1=qlnorm(.975,meanlog=log(cpue$ob),sdlog=cpue$se_log),
+         lwd=3, lend=1)
+matplot(x=1994:2014, y=cpue.table, col=rgb(0, 0, 1, .03), type='l', add=TRUE, lty=1)
+lines(  x=1994:2014, y=apply(cpue.table,1,median), col=rgb(0, 0, .5, .7), lty=1, lwd=3)
+legend('topleft',
+       legend=c("Observed survey biomass (with MLE estimates of 95% intervals)",
+           "MLE estimates of expected survey biomass",
+           "Median MCMC estimate of expected survey biomass",
+           "MCMC samples of estimates of expected survey biomass"),
+       lwd=c(NA,3,3,1),
+       pch=c(21,NA,NA,NA),
+       bg='white',
+       text.col=gray(.6),
+       col=c(1, rgb(1,0,0,.7), rgb(0, 0, .5, .7), rgb(0, 0, 1, .4)),
+       bty='n')
+SSplotIndices(base, subplot=2, add=TRUE, col3=rgb(1,0,0,.7))
+#plotBars.fn(ests2$Year,ests2,scalar=1e6,ylim=c(0,3),pch=20,xlab="Year",ylab="Biomass Index Estimate (million mt)",cex=1.5,las=1,gap=0.05,xaxt="n",ciLwd=3,ciCol=rgb(0,0,1,0.6))
+#plotBars.fn(ests$Year,ests,scalar=1e6,ylim=c(0,3),pch=20,add=T,cex=1.5,las=1,gap=0.05,xaxt="n",ciLwd=3,ciCol=gray(0.2))
+axis(1, at=base$cpue$Yr[base$cpue$Use==1], cex.axis=0.8, tcl=-0.6)
+axis(1, at=1990:2020, lab=rep("",length(1990:2020)), cex.axis=0.8, tcl=-0.3)
+box()
+axis(2, at=(0:5)*1e6, lab=0:5, las=1)
+if(doPNG) {dev.off()}
+
+
 
 ###############################################################################################################
 
@@ -603,6 +642,54 @@ SSplotComps(base,kind="AGE",subplot=1,fleets=2,fleetnames=c("Fishery","Survey"),
 if(doPNG){dev.off()}
 
 ##################################################################
+## Fit to age comps with MCMC values
+## (requires lots of additional calculations to modify base.mcmc$agedbase
+doPNG <- T
+ht <- 6; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"ageCompFitsFishery_MCMC.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+SSplotComps(base.mcmc,kind="AGE",subplot=1,fleets=1,fleetnames=c("Fishery","Survey"),
+            printmkt=FALSE,maxrows=7,maxcols=6,axis1=seq(1,15,2),axis2=seq(0,.7,.2))
+if(doPNG){dev.off()}
+ht <- 2.7; wd<- 6.5
+if(doPNG) {png(file.path(figDir,"ageCompFitsSurvey_MCMC.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+SSplotComps(base.mcmc,kind="AGE",subplot=1,fleets=2,fleetnames=c("Fishery","Survey"),
+            printmkt=FALSE,maxrows=2,maxcols=6,axis1=seq(1,15,2),axis2=seq(0,.7,.2))
+if(doPNG){dev.off()}
+
+##################################################################
+## Alternative view of age comp with fit
+source(file.path(rDir, "agecomp_rainbows.R"))
+ht <- 6; wd<- 8
+if(doPNG) {png(file.path(figDir,"ageCompFitsFisery_rainbows.png"),
+               height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+AgeFits(dat=base, ncol=4)
+dev.off()
+
+##################################################################
+## Alternative view of age comp with fit MCMC
+## (requires lots of additional calculations to modify base.mcmc$agedbase
+source(file.path(rDir, "agecomp_rainbows.R"))
+ht <- 6.5; wd<- 7.5
+if(doPNG) {png(file.path(figDir,"ageCompFitsFisery_rainbows_MCMC.png"),
+               height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+AgeFits(dat=base.mcmc, ncol=4, f=1, uncertainty=TRUE, title.text="Fishery age composition")
+dev.off()
+
+ht <- 6.5; wd<- 2.2
+if(doPNG) {png(file.path(figDir,"ageCompFitsSurvey_rainbows_MCMC.png"),
+               height=ht,width=wd,pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+AgeFits(dat=base.mcmc, ncol=1, f=2, uncertainty=TRUE, title.text="Survey age composition", legend=FALSE,
+        start.color=1)
+dev.off()
+
+
+
+##################################################################
 ## Pearson residuals
 doPNG <- T
 ht <- 7; wd<- 6.5
@@ -775,6 +862,23 @@ pairs(base$mcmc[c(grep("R0",names(base$mcmc)),
           paste("Recruit\ndev.",2005:2013)),
       pch=".",cex.labels=1.2,xaxt="n",yaxt="n",las=1,gap=0.5,oma=c(0,0,0,0))
 if(doPNG){dev.off()}
+
+# individual plot of virgin spawning biomass vs. spawning bio in 2015 
+ht <- 3.5; wd<- 3.5
+if(doPNG) {png(file.path(figDir,"spawn_bio_pair_virg_vs_2015.png"),height=ht,width=wd,
+               pointsize=10,units="in",res=300)}
+if(!doPNG) {windows(width=wd,height=ht)}
+x <- 1e-6*base$mcmc$SPB_Virgin/2
+y <- 1e-6*base$mcmc$SPB_2015/2
+par(mar=c(4,4,.3,.3))
+plot(x, y,
+     pch=16, col=gray(0,.2), las=1,
+     xlim=c(0, 1.05*max(x,y)), xaxs='i',
+     ylim=c(0, 1.05*max(x,y)), yaxs='i',
+     xlab="Equilibrium spawning biomass (million t)",
+     ylab="Spawning biomass in 2015 (million t)")
+abline(0, 1, lty=3)
+dev.off()
 
 # SD of recruit devs
 labs <- base$recruitpars$Label[base$recruitpars$Yr %in% 1971:2011]
@@ -1141,6 +1245,9 @@ lines(c(medCatch,medCatch),c(0,tmpy),lwd=2)
 text(medCatch,mean(c(0,tmpy)),paste("Median",round(medCatch,3),sep=" = "),srt=90,adj=c(0.5,-0.5))
 box()
 if(doPNG){dev.off()}
+
+
+
 
 
 

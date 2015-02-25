@@ -11,6 +11,7 @@ if (system("hostname", intern=TRUE) %in% c("NWCDW01724920","NWCLW01724829","ian-
   rDir    <- "c:/GitHub/hakeAssess/hake2015/Rcode/"
   figDir  <- file.path(hakedir,"WriteUp/Figures")
   SSdir   <- file.path(hakedir, "Models")
+  SSdir2014 <- "C:/ss/hake/Hake_2014/runs/"
   doMaps  <- FALSE
 }
 
@@ -114,6 +115,18 @@ SSplotComparisons(retro.summ,legendlabels=retro_names,
                   par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
 
 
+### comparison of 2014 and 2015 models
+# assuming that base and mcmc already loaded above
+base2014 <- SS_output(dir=file.path(SSdir2014,
+                          "2014hake_21_TVselex1991start_cleanInputFiles"))
+mcmc2014 <- SSgetMCMC(dir=file.path(SSdir2014,
+                          "2014hake_21_TVselex1991start_MCMC"),
+                      writecsv=FALSE)
+if(nrow(mcmc2014$model1)!=999){
+  stop("MCMC is not 999 rows! Make sure you did this on purpose.")
+}
+base2014$mcmc2014 <- data.frame(mcmc2014$model1)
+summary14_15 <- SSsummarize(list(base, base2014))
 
 
 ### read base model if not already in workspace from other code
@@ -345,3 +358,115 @@ legend('topright', lwd=c(3,2,2,2), lty=c(1,1,1),
        legend=c(sens_M_names[1],"Lorenzen M (lines for ages 0-5)",
            "M related to Humboldt Squid"))
 if(doPNG) {dev.off()}
+
+
+
+
+#########################################################
+### R0 profile
+#########################################################
+
+# vector of values to profile over
+R0.vec <- seq(15.5,14.0,-.2)
+Nprof.R0 <- length(R0.vec)
+
+mydir <- file.path(SSdir, "Profiles/2015hake_basePreSRG_R0profile")
+
+
+starter <- SS_readstarter(file.path(mydir, 'starter.ss'))
+# change control file name in the starter file
+starter$ctlfile <- "control_modified.ss"
+# make sure the prior likelihood is calculated
+# for non-estimated quantities
+starter$prior_like <- 1
+# write modified starter file
+SS_writestarter(starter, dir=mydir, overwrite=TRUE)
+# run SS_profile command
+#  profile <- SS_profile(dir=mydir, # directory
+
+  # note! had to change phase of SelPar1 from 2 to 1
+  
+  profile <- SS_profile(dir=getwd(), # directory
+                        model="ss3",
+                        masterctlfile="control.ss_new",
+                        newctlfile="control_modified.ss",
+                        string="R0",
+                        profilevec=R0.vec)
+
+
+  # read the output files (with names like Report1.sso, Report2.sso, etc.)
+  setwd('C:/ss/thornyheads/runs/')
+  prof.R0.models <- SSgetoutput(dirvec=mydir, keyvec=1:Nprof.R0)
+  # summarize output
+  prof.R0.summary <- SSsummarize(prof.R0.models)
+  
+  #  sbase <- SS_output('SST_BASE_pre-STAR')
+  prof.R0.models$MLE <- sbase
+  prof.R0.summary <- SSsummarize(prof.R0.models)
+  # END OPTIONAL COMMANDS
+  
+  # plot profile using summary created above
+  png(file.path(mydir,"R0_profile_plot.png"),width=7,height=4.5,res=300,units='in')
+  par(mar=c(5,4,1,1))
+  SSplotProfile(prof.R0.summary,           # summary object
+                profile.string = "R0", # substring of profile parameter
+                profile.label=expression(log(italic(R)[0])),ymax=15,
+                pheight=4.5,print=FALSE,plotdir=mydir) # axis label
+  baseval <- round(sbase$parameters$Value[grep("R0",sbase$parameters$Label)],2)
+  baselab <- paste(baseval,sep="")
+  axis(1,at=baseval,label=baselab)
+  dev.off()
+  # make timeseries plots comparing models in profile
+  labs <- paste("log(R0) =",R0.vec[c(1,3,5,7,9,11)])
+  labs[3] <- paste("log(R0) =",baseval,"(Base model)")
+  SSplotComparisons(prof.R0.summary,legendlabels=labs,
+                    models=c(1,3,12,7,9,11),
+                    pheight=4.5,png=TRUE,plotdir=mydir,legendloc='bottomleft')
+
+  round(range(prof.R0.summary$quants[prof.R0.summary$quants$Label=="SPB_Virgin",1:11]))
+  ## 42263 312282
+  round(100*range(prof.R0.summary$quants[prof.R0.summary$quants$Label=="Bratio_2013",1:11]),1)
+  ## 39.2 87.9
+  
+  Qvec <- rep(NA,12)
+  for(i in 1:12)
+    Qvec[i] <- unique(prof.R0.summary$indices$Calc_Q[prof.R0.summary$indices$FleetNum==9 &
+                                                     prof.R0.summary$indices$imodel==i])
+  R0.vec2 <- c(R0.vec,baseval)
+  plot(R0.vec2[1:11],Qvec[1:11],type='l',lwd=3,ylim=c(0,2),las=1,yaxs='i',
+       xlab=expression(log(italic(R)[0])),ylab="Catchability of NWFSC Combo Survey")
+  points(R0.vec2[12],Qvec[12],pch=16,cex=2)
+  axis(1,at=baseval,label=baselab)
+  axis(2,at=round(Qvec[12],2),las=1)
+
+  deplvec <- prof.R0.summary$quants[prof.R0.summary$quants$Label=="Bratio_2013",1:12]
+  B0vec <- prof.R0.summary$quants[prof.R0.summary$quants$Label=="SPB_Virgin",1:12]/1e3
+
+  
+  png(file.path(mydir,"R0_profile_dependencies.png"),width=7,height=9,res=300,units='in')
+  par(mfrow=c(3,1),mar=c(1,4,1,1),oma=c(4,0,0,0),cex=.9)
+  plot(R0.vec2[1:11],B0vec[1:11],type='l',lwd=3,ylim=c(0,max(B0vec)),las=1,yaxs='i',xaxs='i',
+       xlab="",ylab=expression(paste(italic(B)[0]," (1000 mt)")))
+  points(R0.vec2[12],B0vec[12],pch=16,cex=2)
+  abline(h=B0vec[12],lty=3)
+  axis(2,at=round(B0vec[12],2),las=1,padj=1.3)
+  axis(1,at=baseval,label=baselab)
+  abline(v=baseval,lty=3)
+
+  plot(R0.vec2[1:11],deplvec[1:11],type='l',lwd=3,ylim=c(0,1),las=1,yaxs='i',xaxs='i',
+       xlab="",ylab="Spawning depletion")
+  points(R0.vec2[12],deplvec[12],pch=16,cex=2)
+  abline(h=deplvec[12],lty=3)
+  axis(1,at=baseval,label=baselab)
+  abline(v=baseval,lty=3)
+
+  plot(R0.vec2[1:11],Qvec[1:11],type='l',lwd=3,ylim=c(0,2),las=1,yaxs='i',xaxs='i',
+       xlab="",ylab="Catchability of NWFSC Combo Survey")
+  points(R0.vec2[12],Qvec[12],pch=16,cex=2)
+  axis(1,at=baseval,label=baselab)
+  axis(2,at=round(Qvec[12],2),las=1)
+  abline(h=Qvec[12],lty=3)
+  abline(v=baseval,lty=3)
+  mtext(side=1,line=2,outer=TRUE,expression(log(italic(R)[0])))
+  dev.off()
+  
