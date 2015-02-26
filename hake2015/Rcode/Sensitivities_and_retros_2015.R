@@ -198,6 +198,51 @@ SSplotComparisons(sens_surv_summary,legendlabels=sens_surv_names,
                   pwidth=6.5, pheight=3.75, ptsize=10,
                   par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
 
+
+# base vs. lower survey value
+sens_surv_summary <- SSsummarize(list(base,
+                                      sens_surv_low2013))
+sens_surv_names <- c("Base model (2013 survey = 2.42 million t)",
+                     "No extrapolation (2013 survey = 1.80 million t)")
+colvec <- c(1,2)
+SSplotComparisons(sens_surv_summary,legendlabels=sens_surv_names,
+                  plotdir=file.path(figDir, "sensitivities_surveys2"),
+                  png=TRUE,
+                  plot=FALSE,
+                  col=colvec,
+                  indexUncertainty=TRUE,
+                  spacepoints=3000, # this removes points on lines
+                  labels=comparisonLabels, # change label on spawn bio plot
+                  endyr=endYr,new=F,minbthresh=0,btarg=-0.4,
+                  subplots=1:20,legendloc="topright",
+                  pwidth=6.5, pheight=3.75, ptsize=10,
+                  par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
+
+SSplotComparisons(sens_surv_summary,legendlabels=sens_surv_names,
+                  subplots=11, indexPlotEach=TRUE, shadealpha=0.7,
+                  plotdir=file.path(figDir, "sensitivities_surveys2"),
+                  png=TRUE,
+                  plot=FALSE,
+                  col=colvec,
+                  indexUncertainty=TRUE,
+                  spacepoints=3000, # this removes points on lines
+                  labels=comparisonLabels, # change label on spawn bio plot
+                  endyr=endYr,new=F,minbthresh=0,btarg=-0.4,
+                  legendloc="topright",
+                  pwidth=6.5, pheight=3.75, ptsize=10,
+                  par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
+
+# reduction of catch by 2653 t based on request from Barry Ackerman
+sens_lowCatch <- SS_output(file.path(SSdir, "2015hake_basePreSRG_less3kt_catch"))
+SStableComparisons(SSsummarize(list(base, sens_lowCatch)),
+                   modelnames=c("Base model", "Catch reduced by 2,653 t"),
+                   csv=FALSE, models = "all",
+                   mcmc=FALSE)
+
+  
+
+
+
 # comparison of autocorellation sensitivities
 sens_autoCor_summary <- SSsummarize(list(base,
                                          sens_autoCorRecr,
@@ -382,51 +427,49 @@ starter$prior_like <- 1
 # write modified starter file
 SS_writestarter(starter, dir=mydir, overwrite=TRUE)
 # run SS_profile command
-#  profile <- SS_profile(dir=mydir, # directory
 
-  # note! had to change phase of SelPar1 from 2 to 1
+setwd(mydir)
+profile <- SS_profile(dir=getwd(), # directory
+                      model="ss3",
+                      masterctlfile="control.ss_new",
+                      newctlfile="control_modified.ss",
+                      string="R0",
+                      profilevec=R0.vec)
+
+
+# read the output files (with names like Report1.sso, Report2.sso, etc.)
+prof.R0.models <- SSgetoutput(dirvec=mydir, keyvec=1:Nprof.R0)
+# summarize output
+prof.R0.summary <- SSsummarize(prof.R0.models)
+
+prof.R0.models$MLE <- base
+prof.R0.summary <- SSsummarize(prof.R0.models)
+# END OPTIONAL COMMANDS
   
-  profile <- SS_profile(dir=getwd(), # directory
-                        model="ss3",
-                        masterctlfile="control.ss_new",
-                        newctlfile="control_modified.ss",
-                        string="R0",
-                        profilevec=R0.vec)
+# plot profile using summary created above
+png(file.path(mydir,"R0_profile_plot.png"),width=7,height=4.5,res=300,units='in')
+par(mar=c(5,4,1,1))
+SSplotProfile(prof.R0.summary,           # summary object
+              profile.string = "R0", # substring of profile parameter
+              profile.label=expression(log(italic(R)[0])),ymax=9,
+              pheight=4.5, print=FALSE, plotdir=mydir)
+baseval <- round(base$parameters$Value[grep("R0",base$parameters$Label)],2)
+baselab <- paste(baseval,sep="")
+axis(1,at=baseval,label=baselab)
+dev.off()
+
+# make timeseries plots comparing models in profile
+labs <- paste("log(R0) =",R0.vec[c(1,3,5,7,9,11)])
+labs[3] <- paste("log(R0) =",baseval,"(Base model)")
+SSplotComparisons(prof.R0.summary,legendlabels=labs,
+                  models=c(1,3,12,7,9,11),
+                  pheight=4.5,png=TRUE,plotdir=mydir,legendloc='bottomleft')
 
 
-  # read the output files (with names like Report1.sso, Report2.sso, etc.)
-  setwd('C:/ss/thornyheads/runs/')
-  prof.R0.models <- SSgetoutput(dirvec=mydir, keyvec=1:Nprof.R0)
-  # summarize output
-  prof.R0.summary <- SSsummarize(prof.R0.models)
-  
-  #  sbase <- SS_output('SST_BASE_pre-STAR')
-  prof.R0.models$MLE <- sbase
-  prof.R0.summary <- SSsummarize(prof.R0.models)
-  # END OPTIONAL COMMANDS
-  
-  # plot profile using summary created above
-  png(file.path(mydir,"R0_profile_plot.png"),width=7,height=4.5,res=300,units='in')
-  par(mar=c(5,4,1,1))
-  SSplotProfile(prof.R0.summary,           # summary object
-                profile.string = "R0", # substring of profile parameter
-                profile.label=expression(log(italic(R)[0])),ymax=15,
-                pheight=4.5,print=FALSE,plotdir=mydir) # axis label
-  baseval <- round(sbase$parameters$Value[grep("R0",sbase$parameters$Label)],2)
-  baselab <- paste(baseval,sep="")
-  axis(1,at=baseval,label=baselab)
-  dev.off()
-  # make timeseries plots comparing models in profile
-  labs <- paste("log(R0) =",R0.vec[c(1,3,5,7,9,11)])
-  labs[3] <- paste("log(R0) =",baseval,"(Base model)")
-  SSplotComparisons(prof.R0.summary,legendlabels=labs,
-                    models=c(1,3,12,7,9,11),
-                    pheight=4.5,png=TRUE,plotdir=mydir,legendloc='bottomleft')
-
-  round(range(prof.R0.summary$quants[prof.R0.summary$quants$Label=="SPB_Virgin",1:11]))
-  ## 42263 312282
-  round(100*range(prof.R0.summary$quants[prof.R0.summary$quants$Label=="Bratio_2013",1:11]),1)
-  ## 39.2 87.9
+round(range(as.numeric(prof.R0.summary$quants[prof.R0.summary$quants$Label=="SPB_Virgin",]),na.rm=TRUE))
+## 42263 312282
+round(100*range(prof.R0.summary$quants[prof.R0.summary$quants$Label=="Bratio_2013",1:11]),1)
+## 39.2 87.9
   
   Qvec <- rep(NA,12)
   for(i in 1:12)
