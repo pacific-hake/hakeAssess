@@ -21,10 +21,6 @@ write.table(x=newpar,
 parTestOut <- SS_output(file.path(SSdir, '2015hake_basePreSRG_parTest'),covar=FALSE)
 
 
-if(nrow(posts)>999){
-  stop("code wasn't written for more than 999 rows in posteriors.sso")
-}
-
 # change working directory to make life simple
 setwd(file.path(SSdir, '2015hake_basePreSRG_mcmc12e6_reports'))
 

@@ -234,12 +234,51 @@ SSplotComparisons(sens_surv_summary,legendlabels=sens_surv_names,
 
 # reduction of catch by 2653 t based on request from Barry Ackerman
 sens_lowCatch <- SS_output(file.path(SSdir, "2015hake_basePreSRG_less3kt_catch"))
-SStableComparisons(SSsummarize(list(base, sens_lowCatch)),
-                   modelnames=c("Base model", "Catch reduced by 2,653 t"),
-                   csv=FALSE, models = "all",
-                   mcmc=FALSE)
-
+tmp <- SStableComparisons(SSsummarize(list(base, sens_lowCatch)),
+                          modelnames=c("Base model", "Catch reduced by 2,653 t"),
+                          names=c("Recr_2010","SPB_Virg","Bratio_2015","ForeCatch_2015"),
+                          csv=FALSE, models = "all",
+                          mcmc=FALSE)
+tmp$ratio <- tmp[,3]/tmp[,2]
   
+sens_nonLinearQ <- SS_output(file.path(SSdir, "2015hake_basePreSRG_nonLinearQ"))
+sens_nonLinearQ_parm <- SS_output(file.path(SSdir, "2015hake_basePreSRG_nonLinearQ_parm"))
+sens_lowAc <- SS_output(file.path(SSdir, "2015hake_basePreSRG_lowAc_MLE"))
+sens_lowAc_nonLinearQ_parm <- SS_output(file.path(SSdir, "2015hake_basePreSRG_lowAc_Ian_nonLinearQ_parm"))
+sens_Qsummary <- SSsummarize(list(base,       sens_nonLinearQ_parm,
+                                  sens_lowAc, sens_lowAc_nonLinearQ_parm))
+sens_surv_names <- c("Base model (MLE)",
+                     "Non-linear catchability (MLE)",
+                     "Lower acoustic biomass (MLE)",
+                     "Lower acoustic biomass & non-linear catchability (MLE)")
+colvec <- 1:4
+dir.create(file.path(figDir, "sensitivities_nonLinearQ"))
+SSplotComparisons(sens_Qsummary,legendlabels=sens_surv_names,
+                  plotdir=file.path(figDir, "sensitivities_nonLinearQ"),
+                  png=TRUE,
+                  plot=FALSE,
+                  col=colvec,
+                  indexUncertainty=TRUE,
+                  spacepoints=3000, # this removes points on lines
+                  labels=comparisonLabels, # change label on spawn bio plot
+                  endyr=endYr,new=F,minbthresh=0,btarg=-0.4,
+                  legendloc="topright",
+                  pwidth=6.5, pheight=3.75, ptsize=10,
+                  par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
+SSplotComparisons(sens_Qsummary,legendlabels=sens_surv_names,indexQlabel=FALSE,
+                  subplots=11:12, indexPlotEach=TRUE, shadealpha=0.7,
+                  plotdir=file.path(figDir, "sensitivities_nonLinearQ"),
+                  png=TRUE,
+                  plot=FALSE,
+                  col=colvec,
+                  indexUncertainty=TRUE,
+                  spacepoints=3000, # this removes points on lines
+                  labels=comparisonLabels, # change label on spawn bio plot
+                  endyr=endYr,new=F,minbthresh=0,btarg=-0.4,
+                  legendloc="topright",
+                  pwidth=6.5, pheight=3.75, ptsize=10,
+                  par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
+
 
 
 
