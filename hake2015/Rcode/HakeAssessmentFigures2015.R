@@ -80,7 +80,7 @@ dev2015 <- base$mcmc[,grep("Early_InitAge_20",names(base$mcmc)):
                      grep(paste0("ForeRecr_",endYr+2),names(base$mcmc))]
 devlower <- apply(dev2015,2,quantile,prob=0.025)
 devmed <- apply(dev2015,2,quantile,prob=0.5)
-devupper <- apply(dev2015,2,quantile,prob=0.955)
+devupper <- apply(dev2015,2,quantile,prob=0.975)
 
 # load stuff for maps (if requested)
 if(doMaps){
@@ -360,11 +360,15 @@ show <- devyrs<=2015
 if(doPNG) {png(file.path(figDir,"recruitment_deviations.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.5,3.5,1,1),oma=c(0,0,0,0))
-plotBars.fn(devyrs,y,scalar=1,ylim=c(-4.5,4.5),pch=20,xlab="Year",ylab="Log-scale recruitment deviations ",cex=0.8,las=1,gap=0,xaxt="n",ciLwd=1,ciCol=rgb(0,0,1,0.5),mgp=c(2.3,1,0),xlim=range(devyrs))
+plotBars.fn(devyrs[show],y[show,],scalar=1,ylim=c(-4.5,4.5),pch=20,
+            xlab="Year",ylab="Log-scale recruitment deviations ",cex=0.8,las=1,gap=0,
+            xaxt="n",ciLwd=1,ciCol=rgb(0,0,1,0.5),mgp=c(2.3,1,0),
+            xlim=range(devyrs[show]))
 #plotBars.fn(yrs[1],data.frame(value=rmed[1],lo=rlower[1],hi=rupper[1]),scalar=1,pch=4,cex=0.8,las=1,gap=0,ciLwd=1,ciCol=rgb(0,0,1,0.5),add=T)
 #legend("topleft","Unfished equilibrium recruitment",pch=4,bty="n")
 axis(1,at=seq(1945,2015,5))
 abline(h=0,col=rgb(0,0,0,0.5))
+abline(h=seq(-4,4,2), col=rgb(0,0,0,0.5), lty='13', lwd=0.5)
 if(doPNG){dev.off()}
 
 #Fishing Intensity
@@ -771,6 +775,10 @@ require(coda)
 hakeMCMC <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=TRUE,
             keystrings = c("NatM", "R0", "steep", "Q_extraSD"),
                       nuisancestrings = c("Objective_function", "SPB_", "InitAge", "RecrDev"))
+# trying again with all parameters in the nuisance strings list
+hakeMCMC <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),writecsv=TRUE,
+            keystrings = c("NatM", "R0", "steep", "Q_extraSD"),
+                      nuisancestrings = c(base$parameters$Label, "Objective_function", "SPB_"))
 ht <- 4; wd<- 4.5
 
 if(doPNG) {png(file.path(figDir,"mcmcM.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
@@ -808,13 +816,13 @@ hakeMCMC <- SSgetMCMC(dir=file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),
                       nuisancestrings = c("SPB_","Bratio_","Recr_"))
 #mcmc.out(paste(SSdir,"2013hake_19_mcmc/",sep="/"),run="",numparams=4)
 
-
-if(doPNG) {png(file.path(figDir,"mcmcDiagnostics.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
+ht <- 4.0; wd<- 4.5
+if(doPNG) {png(file.path(figDir,"mcmcDiagnostics_expanded.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mar=c(5,4,0,0.5),oma=c(0,0,0.5,0.5))
 mcmc.stats <- mcmc.nuisance(file.path(SSdir,"2015hake_basePreSRG_mcmc12e6"),run="",
-                            labelstrings=c("NatM","R0", "steep", "Q_extraSD",
-                                "SPB_","Bratio_","RecrDev_"),bothfiles=T)
+                            labelstrings=c(base$parameters$Label,
+                                "SPB_","Bratio_"),bothfiles=T)
 if(doPNG){dev.off()}
 # which parameters (if any) failed test (NULL = none in 2015)
 mcmc.stats$Label[mcmc.stats$heidelwelsch=="Failed"]
@@ -1119,7 +1127,10 @@ ht <- 3.75; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"MLEvsMCMC_depl.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
-SSplotComparisons(models,legendlabels=modelnames,endyr=endYr,new=F,minbthresh=0,subplots=4,legend=T,col=c("red","black"),shadecol=rgb(c(1,0),c(0,0),c(0,0),alpha=0.1),btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
+SSplotComparisons(models,legendlabels=modelnames,endyr=endYr,new=F,minbthresh=0,
+                  subplots=4,legend=T,col=c("red","black"),
+                  spacepoints=3000,
+                  shadealpha=0.1,btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
 abline(h=c(0.1,0.4),lty=2)
 axis(2,at=c(0.1,0.4),cex.axis=0.8)
 if(doPNG){dev.off()}
@@ -1128,14 +1139,19 @@ ht <- 3.75; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"MLEvsMCMC_spb.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
-SSplotComparisons(models,legendlabels=modelnames,endyr=endYr,new=F,minbthresh=0,subplots=2,legend=T,col=c("red","black"),shadecol=rgb(c(1,0),c(0,0),c(0,0),alpha=0.1),btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
+SSplotComparisons(models,legendlabels=modelnames,endyr=endYr,new=F,minbthresh=0,
+                  subplots=2,legend=T,col=c("red","black"),
+                  shadealpha=0.1,btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
 if(doPNG){dev.off()}
 
 ht <- 3.75; wd<- 6.5
 if(doPNG) {png(file.path(figDir,"MLEvsMCMC_recr.png"),height=ht,width=wd,pointsize=10,units="in",res=300)}
 if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
-SSplotComparisons(models,legendlabels=modelnames,endyr=endYr,new=F,minbthresh=0,subplots=8,legend=T,col=c("red","black"),shadecol=rgb(c(1,0),c(0,0),c(0,0),alpha=0.1),btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
+SSplotComparisons(models,legendlabels=modelnames,endyr=endYr,new=F,minbthresh=0,
+                  subplots=8,legend=T,col=c("red","black"),
+                  shadealpha=0.1, spacepoints=1,
+                  btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
 if(doPNG){dev.off()}
 
 

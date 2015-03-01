@@ -1,46 +1,50 @@
-# base vs. lower survey value MCMC
-sens_lowAc     <- SS_output(file.path(SSdir, "2015hake_basePreSRG_lowAc_MLE"))
-sens_lowAc_nlq <- SS_output(file.path(SSdir, "2015hake_basePreSRG_lowAc_Ian_nonLinearQ_parm"))
-sens_lowAc_nlq$mcmc <- SSgetMCMC(file.path(SSdir, '2015hake_basePreSRG_lowAc_Ian_nonLinearQ_mcmc11e6'),
-                                 writecsv=FALSE)[[1]]
+### code for sensitivities at SRG meeting, February 2015
 
-sens_lowAc_summary <- SSsummarize(list(base,sens_lowAc,sens_lowAc_nlq))
-sens_lowAc_summary$mcmc[[1]] <- base$mcmc
-sens_lowAc_summary$mcmc[[2]] <- sens_lowAc$mcmc
-sens_lowAc_summary$mcmc[[3]] <- sens_lowAc_nlq$mcmc
+stop("\n  This file should not be sourced!")
 
-sens_lowAc_names <- c("Base model",
-                     "Lower '12 & '13 survey",
-                     "Lower '12 & '13 survey, non-linear Q")
-colvec <- c(1,2,3)
-dir.create(file.path(figDir, "sensitivities_surveys_mcmc_nlq"))
-SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
-                  plotdir=file.path(figDir, "sensitivities_surveys_mcmc_nlq"),
-                  png=TRUE,
-                  plot=FALSE,
-                  mcmcVec=rep(TRUE,3),
-                  col=colvec,
-                  indexUncertainty=TRUE,
-                  spacepoints=3000, # this removes points on lines
-                  labels=comparisonLabels, # change label on spawn bio plot
-                  endyr=endYr,new=F,minbthresh=0,btarg=-0.4,
-                  subplots=c(1:10,13:20),legendloc="topright",
-                  pwidth=6.5, pheight=3.75, ptsize=10,
-                  par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
-SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
-                  subplots=11:12, indexPlotEach=TRUE, shadealpha=0.7,
-                  plotdir=file.path(figDir, "sensitivities_surveys_mcmc_nlq"),
-                  png=TRUE,
-                  plot=FALSE,
-                  mcmcVec=rep(FALSE,3),
-                  col=colvec,
-                  indexUncertainty=TRUE,
-                  spacepoints=3000, # this removes points on lines
-                  labels=comparisonLabels, # change label on spawn bio plot
-                  endyr=endYr,new=F,minbthresh=0,btarg=-0.4,
-                  legendloc="topright",
-                  pwidth=6.5, pheight=3.75, ptsize=10,
-                  par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
+## # base vs. lower survey value MCMC
+## sens_lowAc     <- SS_output(file.path(SSdir, "2015hake_basePreSRG_lowAc_MLE"))
+## sens_lowAc_nlq <- SS_output(file.path(SSdir, "2015hake_basePreSRG_lowAc_Ian_nonLinearQ_parm"))
+## sens_lowAc_nlq$mcmc <- SSgetMCMC(file.path(SSdir, '2015hake_basePreSRG_lowAc_Ian_nonLinearQ_mcmc11e6'),
+##                                  writecsv=FALSE)[[1]]
+
+## sens_lowAc_summary <- SSsummarize(list(base,sens_lowAc,sens_lowAc_nlq))
+## sens_lowAc_summary$mcmc[[1]] <- base$mcmc
+## sens_lowAc_summary$mcmc[[2]] <- sens_lowAc$mcmc
+## sens_lowAc_summary$mcmc[[3]] <- sens_lowAc_nlq$mcmc
+
+## sens_lowAc_names <- c("Base model",
+##                      "Lower '12 & '13 survey",
+##                      "Lower '12 & '13 survey, non-linear Q")
+## colvec <- c(1,2,3)
+## dir.create(file.path(figDir, "sensitivities_surveys_mcmc_nlq"))
+## SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
+##                   plotdir=file.path(figDir, "sensitivities_surveys_mcmc_nlq"),
+##                   png=TRUE,
+##                   plot=FALSE,
+##                   mcmcVec=rep(TRUE,3),
+##                   col=colvec,
+##                   indexUncertainty=TRUE,
+##                   spacepoints=3000, # this removes points on lines
+##                   labels=comparisonLabels, # change label on spawn bio plot
+##                   endyrvec=endYr,new=F,minbthresh=0,btarg=-0.4,
+##                   subplots=c(1:10,13:20),legendloc="topright",
+##                   pwidth=6.5, pheight=3.75, ptsize=10,
+##                   par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
+## SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
+##                   subplots=11:12, indexPlotEach=TRUE, shadealpha=0.7,
+##                   plotdir=file.path(figDir, "sensitivities_surveys_mcmc_nlq"),
+##                   png=TRUE,
+##                   plot=FALSE,
+##                   mcmcVec=rep(FALSE,3),
+##                   col=colvec,
+##                   indexUncertainty=TRUE,
+##                   spacepoints=3000, # this removes points on lines
+##                   labels=comparisonLabels, # change label on spawn bio plot
+##                   endyrvec=endYr,new=F,minbthresh=0,btarg=-0.4,
+##                   legendloc="topright",
+##                   pwidth=6.5, pheight=3.75, ptsize=10,
+##                   par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
 
 
 # base vs. lower survey value MCMC
@@ -60,14 +64,37 @@ sens_lowAc_names <- c("Base model",
                       "Modified '12 & '13 survey")
 sens_lowAc_names_MLE <- c("Base model MLE",
                           "Modified '12 & '13 survey MLE")
+
+comparisonLabels <-
+  c("Year", "Spawning biomass (mt)", "Relative spawning biomass", 
+    "Age-0 recruits (1,000s)", "Recruitment deviations", 
+    "Index", "Log index", "SPR ratio", "Density", "Management target", 
+    "Minimum stock size threshold",
+    "Female spawning biomass (million t)", # this value changed for hake 2015
+    "Harvest rate")
+
+SStableComparisons(sens_lowAc_summary,
+                   modelnames=c("Base model", "Low_Acoustic_Survey"),
+                   names=c("R0", "steep", "NatM", "Q_calc", "Q_extraSD",
+                       "Recr_2008", "Recr_2010",
+                       "SPB_Virg","Bratio_2009","Bratio_2015",
+                       "SPRratio_2014",
+                       "ForeCatch_2015",
+                       "SSB_SPRtgt",
+                       "Fstd_SPRtgt",
+                       "TotYield_SPRtgt"),
+                   csv=FALSE, models = "all",
+                   mcmc=rep(TRUE,2))
+
 colvec <- c(1,2)
+pchvec <- c(21,23)
 dir.create(file.path(figDir, "sensitivities_surveys_mcmc"))
 SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
                   plotdir=file.path(figDir, "sensitivities_surveys_mcmc"),
                   png=TRUE,
                   plot=FALSE,
                   mcmcVec=rep(TRUE,2),
-                  col=colvec,
+                  col=colvec, pch=pchvec,
                   indexUncertainty=TRUE,
                   spacepoints=3000, # this removes points on lines
                   labels=comparisonLabels, # change label on spawn bio plot
@@ -79,8 +106,23 @@ SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
                       "2010 recruitment (billions)",
                       "2015 default harvest catch limit ('1000 t)",
                       "2015 overfishing limit (no 40:10 adjustment)"),
-                  endyr=endYr,new=F,minbthresh=0,btarg=-0.4,
+                  densitytails=FALSE, densitymiddle=TRUE, # shade middle rather than tails
+                  endyrvec=endYr,new=F,minbthresh=0,btarg=-0.4,
                   subplots=c(1:10,13:20),legendloc="topright",
+                  pwidth=6.5, pheight=3.75, ptsize=10,
+                  par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
+
+# recruitment figure has additional settings
+SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
+                  plotdir=file.path(figDir, "sensitivities_surveys_mcmc"),
+                  png=TRUE,
+                  plot=FALSE,
+                  mcmcVec=rep(TRUE,2),
+                  col=colvec, pch=pchvec,
+                  type='p', spacepoints=1, # adds points instead of lines
+                  labels=comparisonLabels, # change label on spawn bio plot
+                  endyrvec=endYr,new=F,minbthresh=0,btarg=-0.4,
+                  subplots=8,legendloc="topright",
                   pwidth=6.5, pheight=3.75, ptsize=10,
                   par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
 
@@ -92,6 +134,8 @@ if(!doPNG) {windows(height=ht,width=wd)}
 par(las=1,mar=c(5, 4, 1, 1) + 0.1,cex.axis=0.9)
 plot(0, type='n', xlim=c(1994,2014), xaxs='i', ylim=c(0,5.5e6), yaxs='i', axes=FALSE,
      xlab="Year",ylab="Biomass index (million t)")
+# data file for use in a few places
+dat <- SS_readdat(file.path(base$inputs$dir, "2015Hake_data.ss"))
 cpue <- dat$CPUE[dat$CPUE$index > 0,]
 ## segments(x0 = cpue$year,
 ##          y0=qlnorm(.025,meanlog=log(cpue$ob),sdlog=cpue$se_log),
@@ -113,7 +157,7 @@ SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names_MLE,
                   indexUncertainty=TRUE,
                   spacepoints=3000, # this removes points on lines
                   labels=comparisonLabels, # change label on spawn bio plot
-                  endyr=endYr,new=F,minbthresh=0,btarg=-0.4,
+                  endyrvec=endYr,new=F,minbthresh=0,btarg=-0.4,
                   legendloc="topright",
                   pwidth=6.5, pheight=3.75, ptsize=10,
                   par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
@@ -123,8 +167,8 @@ axis(1, at=1990:2020, lab=rep("",length(1990:2020)), cex.axis=0.8, tcl=-0.2)
 box()
 axis(2, at=(0:5)*1e6, lab=0:5, las=1)
 if(doPNG) {dev.off()}
-
-
-
-
-
+if(doPNG){
+  file.copy(from=file.path(figDir,"acousticBioFit_modifiedSurvey.png"),
+            to=file.path(figDir, "sensitivities_surveys_mcmc",
+                "acousticBioFit_modifiedSurvey.png"))
+}
