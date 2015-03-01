@@ -1,23 +1,21 @@
 # base vs. lower survey value MCMC
 sens_lowAc     <- SS_output(file.path(SSdir, "2015hake_basePreSRG_lowAc_MLE"))
 sens_lowAc_nlq <- SS_output(file.path(SSdir, "2015hake_basePreSRG_lowAc_Ian_nonLinearQ_parm"))
-sens_lowAc_short     <- SSgetMCMC(file.path(SSdir, '2015hake_basePreSRG_lowAc_Ian_mcmc5.2e6'),
-                                  writecsv=FALSE)[[1]]
-sens_lowAc_nlQ_short <- SSgetMCMC(file.path(SSdir, '2015hake_basePreSRG_lowAc_Ian_nonLinearQ_mcmc4.9e6'),
-                                  writecsv=FALSE)[[1]]
+sens_lowAc_nlq$mcmc <- SSgetMCMC(file.path(SSdir, '2015hake_basePreSRG_lowAc_Ian_nonLinearQ_mcmc11e6'),
+                                 writecsv=FALSE)[[1]]
 
-sens_lowAc_summary <- SSsummarize(list(base,sens_lowAc,sens_lowAc))
+sens_lowAc_summary <- SSsummarize(list(base,sens_lowAc,sens_lowAc_nlq))
 sens_lowAc_summary$mcmc[[1]] <- base$mcmc
-sens_lowAc_summary$mcmc[[2]] <- sens_lowAc_short
-sens_lowAc_summary$mcmc[[3]] <- sens_lowAc_nlQ_short
+sens_lowAc_summary$mcmc[[2]] <- sens_lowAc$mcmc
+sens_lowAc_summary$mcmc[[3]] <- sens_lowAc_nlq$mcmc
 
 sens_lowAc_names <- c("Base model",
                      "Lower '12 & '13 survey",
                      "Lower '12 & '13 survey, non-linear Q")
 colvec <- c(1,2,3)
-dir.create(file.path(figDir, "sensitivities_surveys_mcmc"))
+dir.create(file.path(figDir, "sensitivities_surveys_mcmc_nlq"))
 SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
-                  plotdir=file.path(figDir, "sensitivities_surveys_mcmc"),
+                  plotdir=file.path(figDir, "sensitivities_surveys_mcmc_nlq"),
                   png=TRUE,
                   plot=FALSE,
                   mcmcVec=rep(TRUE,3),
@@ -31,10 +29,10 @@ SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
                   par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
 SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
                   subplots=11:12, indexPlotEach=TRUE, shadealpha=0.7,
-                  plotdir=file.path(figDir, "sensitivities_surveys2"),
+                  plotdir=file.path(figDir, "sensitivities_surveys_mcmc_nlq"),
                   png=TRUE,
                   plot=FALSE,
-                  mcmcVec=rep(TRUE,3),
+                  mcmcVec=rep(FALSE,3),
                   col=colvec,
                   indexUncertainty=TRUE,
                   spacepoints=3000, # this removes points on lines
@@ -46,20 +44,22 @@ SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
 
 
 # base vs. lower survey value MCMC
-sens_lowAc        <- SS_output(file.path(SSdir, "2015hake_basePreSRG_lowAc_MLE"))
-sens_lowAc_short  <- SSgetMCMC(file.path(SSdir, '2015hake_basePreSRG_lowAc_Ian_mcmc5.2e6'),
-                               writecsv=FALSE)[[1]]
-lowAcAllan <- SSgetMCMC(file.path(SSdir,
-                                  'fromAllan_2-26-9pm',
-                                  '2015hake_basePreSRG_lowAcBio_mcmc6mil_extraSurv'),
-                                  writecsv=FALSE)[[1]]
+sens_lowAc      <- SS_output(file.path(SSdir, "2015hake_basePreSRG_lowAc_MLE"))
+sens_lowAc$mcmc <- SSgetMCMC(file.path(SSdir, '2015hake_basePreSRG_lowAcBio_mcmc'),
+                             writecsv=FALSE)[[1]]
+## lowAcAllan <- SSgetMCMC(file.path(SSdir,
+##                                   'fromAllan_2-26-9pm',
+##                                   '2015hake_basePreSRG_lowAcBio_mcmc6mil_extraSurv'),
+##                                   writecsv=FALSE)[[1]]
 sens_lowAc_summary <- SSsummarize(list(base,sens_lowAc))
 sens_lowAc_summary$mcmc[[1]] <- base$mcmc
 #sens_lowAc_summary$mcmc[[2]] <- sens_lowAc_short
-sens_lowAc_summary$mcmc[[2]] <- lowAcAllan
+sens_lowAc_summary$mcmc[[2]] <- sens_lowAc$mcmc
 names(sens_lowAc_summary$mcmc[[1]])[4] <- "SR_LN(R0)"
 sens_lowAc_names <- c("Base model",
                       "Modified '12 & '13 survey")
+sens_lowAc_names_MLE <- c("Base model MLE",
+                          "Modified '12 & '13 survey MLE")
 colvec <- c(1,2)
 dir.create(file.path(figDir, "sensitivities_surveys_mcmc"))
 SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
@@ -77,7 +77,7 @@ SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
                       "log(R0)", "2015 relative spawning biomass",
                       "2015 spawning biomass",
                       "2010 recruitment (billions)",
-                      "2015 default harvest catch limit (million t)",
+                      "2015 default harvest catch limit ('1000 t)",
                       "2015 overfishing limit (no 40:10 adjustment)"),
                   endyr=endYr,new=F,minbthresh=0,btarg=-0.4,
                   subplots=c(1:10,13:20),legendloc="topright",
@@ -98,7 +98,7 @@ cpue <- dat$CPUE[dat$CPUE$index > 0,]
 ##          y1=qlnorm(.975,meanlog=log(cpue$ob),sdlog=cpue$se_log),
 ##          lwd=3, lend=1)
 #SSplotIndices(base, subplot=2, add=TRUE, col3=rgb(1,0,0,.7))
-SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
+SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names_MLE,
                   add=TRUE,
                   type="l",
                   lwd=3,
@@ -119,9 +119,12 @@ SSplotComparisons(sens_lowAc_summary,legendlabels=sens_lowAc_names,
                   par=list(mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0)))
 axis(1, at=base$cpue$Yr[base$cpue$Use==1], cex.axis=0.8, tcl=-0.6)
 axis(1, at=2012, cex.axis=0.8, tcl=-0.6) # numbers were tight so it didn't appear
-axis(1, at=1990:2020, lab=rep("",length(1990:2020)), cex.axis=0.8, tcl=-0.3)
+axis(1, at=1990:2020, lab=rep("",length(1990:2020)), cex.axis=0.8, tcl=-0.2)
 box()
 axis(2, at=(0:5)*1e6, lab=0:5, las=1)
 if(doPNG) {dev.off()}
+
+
+
 
 
