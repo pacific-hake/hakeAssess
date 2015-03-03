@@ -1141,6 +1141,7 @@ if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
 SSplotComparisons(models,legendlabels=modelnames,endyr=endYr,new=F,minbthresh=0,
                   subplots=2,legend=T,col=c("red","black"),
+                  spacepoints=3000,
                   shadealpha=0.1,btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
 if(doPNG){dev.off()}
 
@@ -1150,7 +1151,7 @@ if(!doPNG) {windows(width=wd,height=ht)}
 par(mfrow=c(1,1),las=1,mar=c(3.6,3.6,1,1),oma=c(0,0,0,0),mgp=c(2.5,1,0))
 SSplotComparisons(models,legendlabels=modelnames,endyr=endYr,new=F,minbthresh=0,
                   subplots=8,legend=T,col=c("red","black"),
-                  shadealpha=0.1, spacepoints=1,
+                  shadealpha=0.1, spacepoints=1, type='p',
                   btarg=-0.4,mcmc=c(F,T),legendloc="topleft")
 if(doPNG){dev.off()}
 
