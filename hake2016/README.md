@@ -17,6 +17,7 @@
   2. Fishery age compositions
   3. Survey biomass (series)
   4. Survey age compositions
+  5. Weight-at-age
 3. Bridge Assessment Model
   1. Update catches for 2014 and earlier
   2. Update fishery age compositions for 2014 and earlier
